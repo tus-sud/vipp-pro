@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffe4ee" />
+  <title>Gửi người đặc biệt 💕</title>
+  <meta name="description" content="Một món quà nhỏ ngọt ngào ngập tràn trái tim dành riêng cho cậu." />
+
+  <!-- Font tiếng Việt mềm mại, ngọt ngào -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- SVG ClipPath khung trái tim tỷ lệ chuẩn -->
+  <svg width="0" height="0" class="svg-defs" aria-hidden="true">
+    <defs>
+      <clipPath id="heartClipPath" clipPathUnits="objectBoundingBox">
+        <path d="M 0.5,0.92 C 0.48,0.90 0.04,0.62 0.04,0.32 C 0.04,0.14 0.18,0.04 0.33,0.04 C 0.42,0.04 0.48,0.09 0.5,0.16 C 0.52,0.09 0.58,0.04 0.67,0.04 C 0.82,0.04 0.96,0.14 0.96,0.32 C 0.96,0.62 0.52,0.90 0.5,0.92 Z" />
+      </clipPath>
+    </defs>
+  </svg>
+
+  <!-- Nền ánh sáng pastel mềm mại -->
+  <div class="ambient-bg" aria-hidden="true">
+    <span class="bg-orb orb-1"></span>
+    <span class="bg-orb orb-2"></span>
+    <span class="bg-orb orb-3"></span>
+  </div>
+
+  <!-- Canvas nền: mưa trái tim & tim bay dịu dàng phía sau thẻ -->
+  <canvas id="heartCanvas" aria-hidden="true"></canvas>
+  <!-- Canvas tương tác: pháo hoa trái tim bắn ra rực rỡ phía trước khi chạm -->
+  <canvas id="burstCanvas" aria-hidden="true"></canvas>
+
+  <!-- Thanh điều khiển góc trên -->
+  <header class="top-controls">
+    <button
+      id="frameToggle"
+      class="glass-pill icon-pill"
+      type="button"
+      title="Đổi kiểu khung ảnh (Polaroid / Trái tim)"
+      aria-label="Đổi kiểu khung ảnh"
+    >
+      <span class="pill-icon" aria-hidden="true">💗</span>
+      <span id="frameToggleLabel" class="pill-text">Khung tim</span>
+    </button>
+
+    <button
+      id="musicToggle"
+      class="glass-pill music-pill"
+      type="button"
+      aria-pressed="false"
+      aria-label="Bật hoặc tắt nhạc nền"
+    >
+      <span class="vinyl-disc" aria-hidden="true">
+        <span class="vinyl-heart">♥</span>
+      </span>
+      <span id="musicTitle" class="pill-text">Hộp nhạc ngọt ngào</span>
+      <span class="eq-bars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+  </header>
+
+  <!-- Thông báo nhỏ ngọt ngào khi đạt mốc thả tim -->
+  <div id="milestoneToast" class="milestone-toast" role="status" aria-live="polite"></div>
+
+  <!-- Nội dung chính căn giữa tối ưu cho màn hình điện thoại -->
+  <main class="page-wrapper">
+    <article class="love-card">
+      <!-- Các chi tiết lấp lánh trang trí góc thẻ -->
+      <span class="card-sparkle sp-1" aria-hidden="true">✦</span>
+      <span class="card-sparkle sp-2" aria-hidden="true">♥</span>
+      <span class="card-sparkle sp-3" aria-hidden="true">✦</span>
+
+      <!-- Nhãn nhỏ phía trên -->
+      <div id="badgeWrap" class="badge-wrap">
+        <span class="badge-pill">
+          <span class="badge-dot" aria-hidden="true"></span>
+          <span id="badgeText">Dành riêng cho cậu ✨</span>
+        </span>
+      </div>
+
+      <!-- Tiêu đề & dòng phụ -->
+      <div class="heading-block">
+        <h1 id="titleText" class="love-title">Gửi người đặc biệt nhất</h1>
+        <p id="subtitleText" class="love-subtitle">Mỗi khoảnh khắc bên cậu đều ngọt ngào như mơ</p>
+      </div>
+
+      <!-- Khu vực khung ảnh chính + hiệu ứng nhịp đập trái tim -->
+      <section class="photo-stage" aria-label="Hình ảnh kỷ niệm">
+        <div class="photo-aura" aria-hidden="true"></div>
+
+        <!-- Các trái tim nhỏ bay quanh khung ảnh -->
+        <span class="orbit-heart oh-1" aria-hidden="true">♥</span>
+        <span class="orbit-heart oh-2" aria-hidden="true">♡</span>
+        <span class="orbit-heart oh-3" aria-hidden="true">♥</span>
+        <span class="orbit-heart oh-4" aria-hidden="true">✦</span>
+
+        <button
+          id="photoFrameBtn"
+          class="photo-frame frame-polaroid"
+          type="button"
+          aria-label="Chạm vào ảnh để thả mưa trái tim"
+        >
+          <span class="photo-clip-box">
+            <img
+              id="mainPhoto"
+              src="assets/photo.jpg"
+              alt="Hình ảnh kỷ niệm ngọt ngào"
+              loading="eager"
+              decoding="async"
+            />
+            <span class="photo-sheen" aria-hidden="true"></span>
+            <span id="photoFallback" class="photo-fallback" hidden>
+              <span class="fallback-heart">💖</span>
+              <span>Chưa tìm thấy ảnh<br /><small>Kiểm tra đường dẫn trong config.js</small></span>
+            </span>
+          </span>
+          <span id="photoCaption" class="polaroid-caption">Sweetest Memory 💕</span>
+        </button>
+      </section>
+
+      <!-- Hộp lời nhắn lãng mạn -->
+      <section id="messageBox" class="message-box" aria-label="Lời nhắn">
+        <span class="quote-mark" aria-hidden="true">❝</span>
+        <p id="messageText" class="message-text"></p>
+        <p id="signatureText" class="signature-text"></p>
+      </section>
+
+      <!-- Nút tương tác thả tim -->
+      <div class="card-actions">
+        <button id="heartBtn" class="heart-cta" type="button">
+          <span class="heart-cta-icon" aria-hidden="true">💖</span>
+          <span id="heartBtnText">Thả tim ngay</span>
+          <span id="heartCount" class="heart-count" aria-label="Số lượt thả tim">0</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- Gợi ý nhỏ lúc mới mở trang -->
+    <p id="tapHint" class="tap-hint">Chạm vào màn hình để bắn tim &amp; mở nhạc nhé 💕</p>
+  </main>
+
+  <audio id="customAudio" loop preload="metadata"></audio>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

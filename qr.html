@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tạo Mã QR Trái Tim Ngọt Ngào 💕</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --pink-50: #fff3f8;
+      --pink-100: #ffe3ee;
+      --pink-200: #ffc5db;
+      --pink-400: #ff70a6;
+      --pink-500: #f24b8a;
+      --rose-600: #c92a67;
+      --text-main: #53263a;
+      --text-soft: #855269;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text-main);
+      background: linear-gradient(155deg, #fff6fa 0%, #ffe6f0 48%, #ffd7e9 100%);
+      padding: 24px 16px 44px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-family: 'Dancing Script', 'Times New Roman', 'Segoe UI', serif;
+      font-size: clamp(2.1rem, 5vw, 3rem);
+      color: var(--rose-600);
+    }
+
+    .header p {
+      margin: 6px 0 0;
+      color: var(--text-soft);
+      font-weight: 600;
+      font-size: 0.96rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.84);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 26px;
+      padding: 24px;
+      box-shadow: 0 18px 46px rgba(226, 98, 148, 0.16);
+    }
+
+    .panel-title {
+      margin: 0 0 16px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--rose-600);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 14px;
+      border: 1.5px solid #f7bfd6;
+      background: #fffafd;
+      font-family: inherit;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input:focus {
+      border-color: var(--pink-500);
+      box-shadow: 0 0 0 4px rgba(242, 75, 138, 0.14);
+    }
+
+    .notice {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      font-weight: 600;
+      background: #fff1f6;
+      border: 1px solid #ffc7dd;
+      color: #8c3457;
+    }
+
+    .notice.ok {
+      background: #eefcf4;
+      border-color: #b2ebd0;
+      color: #1f6b47;
+    }
+
+    .option-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip-btn {
+      padding: 8px 13px;
+      border-radius: 999px;
+      border: 1.5px solid #f5bfd4;
+      background: #fff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .chip-btn.active {
+      background: linear-gradient(135deg, #ff7aa8, #f24b8a);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(242, 75, 138, 0.28);
+    }
+
+    .color-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .color-swatch {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1.5px solid #f3c4d6;
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .color-swatch.active {
+      border-color: var(--pink-500);
+      background: #fff2f7;
+      box-shadow: 0 0 0 3px rgba(242, 75, 138, 0.14);
+    }
+
+    .swatch-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      min-width: 190px;
+      padding: 13px 18px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff79ab, #f24b8a);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(242, 75, 138, 0.3);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px rgba(242, 75, 138, 0.38);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 1.5px solid #f5b8d0;
+      background: #fff;
+      color: var(--rose-600);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: #fff2f7;
+    }
+
+    /* Khu vực xem trước QR */
+    .preview-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #qrCanvas {
+      width: 100%;
+      max-width: 390px;
+      height: auto;
+      border-radius: 22px;
+      box-shadow: 0 16px 38px rgba(214, 72, 128, 0.2);
+      background: #fff;
+    }
+
+    .scan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #fff0f6;
+      border: 1px solid #ffc6dc;
+      color: var(--rose-600);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .error-msg {
+      color: #c92a2a;
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Hướng dẫn đưa lên mạng miễn phí */
+    .guide-panel {
+      margin-top: 22px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .steps {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .step-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff8fb, #ffedf4);
+      border: 1px solid #ffd0e2;
+    }
+
+    .step-num {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff7aa8, #f24b8a);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.86rem;
+      margin-bottom: 8px;
+    }
+
+    .step-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.96rem;
+      color: var(--rose-600);
+    }
+
+    .step-card p {
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      font-weight: 600;
+      color: var(--text-soft);
+    }
+
+    .step-card a {
+      color: var(--rose-600);
+      font-weight: 700;
+    }
+
+    code {
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(242, 75, 138, 0.12);
+      color: var(--rose-600);
+      font-size: 0.84em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Tạo Mã QR Trái Tim 💕</h1>
+      <p>Tùy chỉnh thẻ mã QR ngọt ngào, sắc nét và quét cực nhạy trên mọi điện thoại</p>
+    </header>
+
+    <div class="layout">
+      <!-- Cột trái: Cài đặt -->
+      <section class="panel">
+        <h2 class="panel-title">🎀 Tùy chỉnh mã QR của bạn</h2>
+
+        <div class="field">
+          <label for="urlInput">Đường link trang trái tim (khi quét sẽ mở trang này)</label>
+          <input
+            id="urlInput"
+            class="input"
+            type="url"
+            placeholder="https://ten-trang-cua-ban.netlify.app/"
+            spellcheck="false"
+          />
+          <div id="urlNotice" class="notice"></div>
+        </div>
+
+        <div class="field">
+          <label for="captionInput">Dòng chữ ngọt ngào trên thẻ QR</label>
+          <input
+            id="captionInput"
+            class="input"
+            type="text"
+            value="Quét mã đi, có điều bất ngờ nè 💕"
+            maxlength="60"
+          />
+        </div>
+
+        <div class="field">
+          <label for="subCaptionInput">Dòng gợi ý nhỏ bên dưới</label>
+          <input
+            id="subCaptionInput"
+            class="input"
+            type="text"
+            value="Mở camera hoặc Zalo để quét nha ✨"
+            maxlength="60"
+          />
+        </div>
+
+        <div class="field">
+          <label>Kiểu mẫu thẻ QR</label>
+          <div id="themeOptions" class="option-row">
+            <button type="button" class="chip-btn active" data-theme="pastel">Thẻ hồng pastel</button>
+            <button type="button" class="chip-btn" data-theme="white">Thẻ trắng tinh khôi</button>
+            <button type="button" class="chip-btn" data-theme="qr-only">Chỉ khung mã QR</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Kiểu chấm mã QR</label>
+          <div id="dotOptions" class="option-row">
+            <button type="button" class="chip-btn active" data-dot="dots">Chấm tròn mềm mại</button>
+            <button type="button" class="chip-btn" data-dot="rounded">Vuông bo góc</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Màu mã QR (tương phản cao giúp quét cực nhanh)</label>
+          <div id="colorOptions" class="color-row">
+            <button type="button" class="color-swatch active" data-color="#c92a67">
+              <span class="swatch-dot" style="background:#c92a67"></span> Hồng dâu đậm
+            </button>
+            <button type="button" class="color-swatch" data-color="#a61e4d">
+              <span class="swatch-dot" style="background:#a61e4d"></span> Đỏ rượu vang
+            </button>
+            <button type="button" class="color-swatch" data-color="#70288f">
+              <span class="swatch-dot" style="background:#70288f"></span> Tím mận
+            </button>
+            <button type="button" class="color-swatch" data-color="#221723">
+              <span class="swatch-dot" style="background:#221723"></span> Đen cổ điển
+            </button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="downloadBtn" type="button" class="btn-primary">⬇ Tải ảnh mã QR (PNG)</button>
+          <a href="index.html" target="_blank" rel="noopener" class="btn-secondary">🌸 Xem trang trái tim</a>
+        </div>
+      </section>
+
+      <!-- Cột phải: Xem trước trực tiếp -->
+      <section class="panel preview-box">
+        <h2 class="panel-title">💖 Xem trước thẻ mã QR</h2>
+        <canvas id="qrCanvas" width="900" height="1120"></canvas>
+        <div id="qrMeta" class="scan-badge">✓ Chuẩn sửa lỗi Cao 30% • Quét mượt trên iPhone, Android &amp; Zalo</div>
+        <div id="errorMsg" class="error-msg" hidden></div>
+      </section>
+    </div>
+
+    <!-- Hướng dẫn đưa lên mạng miễn phí -->
+    <section class="panel guide-panel">
+      <h2 class="panel-title">🚀 3 bước đưa lên mạng miễn phí để ai ở đâu cũng quét được</h2>
+      <div class="steps">
+        <div class="step-card">
+          <span class="step-num">1</span>
+          <h3>Thay ảnh &amp; lời nhắn</h3>
+          <p>
+            Chép ảnh của bạn vào thư mục <code>assets/</code> rồi mở file <code>config.js</code> để đổi tên ảnh, tiêu đề, lời nhắn hoặc thêm nhạc <code>.mp3</code>.
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">2</span>
+          <h3>Đưa lên mạng trong 10 giây</h3>
+          <p>
+            Mở <a href="https://app.netlify.com/drop" target="_blank" rel="noopener">Netlify Drop</a> và kéo thả cả thư mục dự án vào đó (hoặc dùng GitHub Pages). Bạn sẽ nhận ngay một link <code>https://....netlify.app</code> miễn phí!
+          </p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">3</span>
+          <h3>Tạo &amp; gửi mã QR</h3>
+          <p>
+            Dán đường link vừa tạo vào ô phía trên (hoặc truy cập thẳng <code>link-cua-ban/qr.html</code>), bấm <strong>Tải ảnh mã QR (PNG)</strong> rồi gửi cho người ấy hoặc in ra tặng nhé!
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="qr-engine.js"></script>
+  <script>
+    (() => {
+      'use strict';
+
+      const urlInput = document.getElementById('urlInput');
+      const urlNotice = document.getElementById('urlNotice');
+      const captionInput = document.getElementById('captionInput');
+      const subCaptionInput = document.getElementById('subCaptionInput');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const canvas = document.getElementById('qrCanvas');
+      const ctx = canvas.getContext('2d');
+      const qrMeta = document.getElementById('qrMeta');
+      const errorMsg = document.getElementById('errorMsg');
+
+      const state = {
+        theme: 'pastel',
+        dotStyle: 'dots',
+        color: '#c92a67',
+      };
+
+      // Tự động nhận diện xem trang đang chạy online hay mở trực tiếp trên máy
+      const isPublicHttp =
+        (location.protocol === 'https:' || location.protocol === 'http:') &&
+        !/^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/i.test(location.hostname);
+
+      if (isPublicHttp) {
+        const baseUrl = location.href.replace(/qr\.html(\?.*)?(#.*)?$/i, '');
+        urlInput.value = baseUrl;
+      } else {
+        urlInput.value = 'https://trang-trai-tim-cua-ban.netlify.app/';
+      }
+
+      function updateUrlNotice() {
+        const val = urlInput.value.trim();
+        if (!val) {
+          urlNotice.className = 'notice';
+          urlNotice.textContent = 'Nhập đường link trang web của bạn để tạo mã QR.';
+        } else if (/^file:/i.test(val) || /localhost|127\.0\.0\.1/i.test(val)) {
+          urlNotice.className = 'notice';
+          urlNotice.textContent =
+            'Lưu ý: Link trên máy tính (file:// hoặc localhost) điện thoại bên ngoài sẽ không mở được. Hãy kéo thả thư mục lên Netlify Drop để lấy link https:// rồi dán vào đây nhé!';
+        } else if (val.includes('trang-trai-tim-cua-ban.netlify.app')) {
+          urlNotice.className = 'notice';
+          urlNotice.textContent =
+            'Đây đang là link mẫu để bạn xem trước thiết kế QR. Sau khi đưa thư mục lên Netlify Drop / GitHub Pages, hãy dán link thật của bạn vào ô này nhé!';
+        } else {
+          urlNotice.className = 'notice ok';
+          urlNotice.textContent =
+            '✓ Tuyệt vời! Đường link online hợp lệ — mọi điện thoại đều có thể quét mã QR này.';
+        }
+      }
+
+      function drawRoundedRect(c, x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        c.beginPath();
+        c.moveTo(x + radius, y);
+        c.arcTo(x + w, y, x + w, y + h, radius);
+        c.arcTo(x + w, y + h, x, y + h, radius);
+        c.arcTo(x, y + h, x, y, radius);
+        c.arcTo(x, y, x + w, y, radius);
+        c.closePath();
+      }
+
+      function drawHeart(c, cx, cy, size, fill, rot = 0, alpha = 1) {
+        c.save();
+        c.translate(cx, cy);
+        c.rotate(rot);
+        c.globalAlpha = alpha;
+        c.fillStyle = fill;
+        c.beginPath();
+        c.moveTo(0, size * 0.5);
+        c.bezierCurveTo(-size * 0.78, size * 0.04, -size * 0.82, -size * 0.56, -size * 0.36, -size * 0.56);
+        c.bezierCurveTo(-size * 0.12, -size * 0.56, 0, -size * 0.32, 0, -size * 0.32);
+        c.bezierCurveTo(0, -size * 0.32, size * 0.12, -size * 0.56, size * 0.36, -size * 0.56);
+        c.bezierCurveTo(size * 0.82, -size * 0.56, size * 0.78, size * 0.04, 0, size * 0.5);
+        c.closePath();
+        c.fill();
+        c.restore();
+      }
+
+      function isInFinder(x, y, size) {
+        return (
+          (x < 7 && y < 7) ||
+          (x >= size - 7 && y < 7) ||
+          (x < 7 && y >= size - 7)
+        );
+      }
+
+      function drawFinderEye(c, ox, oy, cell, color) {
+        // Viền ngoài 7x7 bo tròn
+        c.fillStyle = color;
+        drawRoundedRect(c, ox, oy, cell * 7, cell * 7, cell * 1.9);
+        c.fill();
+
+        // Khoảng trắng 5x5
+        c.fillStyle = '#ffffff';
+        drawRoundedRect(c, ox + cell, oy + cell, cell * 5, cell * 5, cell * 1.3);
+        c.fill();
+
+        // Nhân 3x3 bo tròn
+        c.fillStyle = color;
+        drawRoundedRect(c, ox + cell * 2, oy + cell * 2, cell * 3, cell * 3, cell * 0.9);
+        c.fill();
+      }
+
+      function renderCard() {
+        updateUrlNotice();
+        const url = urlInput.value.trim() || 'https://example.com';
+
+        let qr;
+        try {
+          qr = window.QREngine.generate(url, 'H');
+          errorMsg.hidden = true;
+        } catch (err) {
+          errorMsg.hidden = false;
+          errorMsg.textContent = err.message || 'Không thể tạo mã QR.';
+          return;
+        }
+
+        const isCard = state.theme !== 'qr-only';
+        const W = 900;
+        const H = isCard ? 1120 : 900;
+        canvas.width = W;
+        canvas.height = H;
+
+        // 1. Nền thẻ
+        if (state.theme === 'pastel') {
+          const grad = ctx.createLinearGradient(0, 0, W, H);
+          grad.addColorStop(0, '#fff4f9');
+          grad.addColorStop(0.5, '#ffe0ee');
+          grad.addColorStop(1, '#ffcfe3');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, W, H);
+
+          // Viền nét đứt ngọt ngào
+          ctx.save();
+          ctx.strokeStyle = 'rgba(242, 75, 138, 0.28)';
+          ctx.lineWidth = 4;
+          ctx.setLineDash([12, 10]);
+          drawRoundedRect(ctx, 30, 30, W - 60, H - 60, 44);
+          ctx.stroke();
+          ctx.restore();
+
+          // Các trái tim trang trí nhẹ nhàng quanh nền
+          const deco = [
+            [95, 110, 32, '#ff85b3', -0.25, 0.45],
+            [805, 115, 36, '#ff6e9f', 0.22, 0.4],
+            [110, 995, 30, '#ff8fb8', 0.2, 0.42],
+            [790, 1005, 34, '#ff75a4', -0.2, 0.42],
+            [830, 560, 22, '#ff9ec2', 0.3, 0.35],
+            [68, 520, 22, '#ff9ec2', -0.3, 0.35],
+          ];
+          deco.forEach(([x, y, s, col, r, a]) => drawHeart(ctx, x, y, s, col, r, a));
+        } else if (state.theme === 'white') {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, W, H);
+          ctx.strokeStyle = '#ffc5db';
+          ctx.lineWidth = 5;
+          drawRoundedRect(ctx, 28, 28, W - 56, H - 56, 44);
+          ctx.stroke();
+          drawHeart(ctx, 100, 100, 26, '#ffb3cf', -0.2, 0.7);
+          drawHeart(ctx, 800, 100, 26, '#ffb3cf', 0.2, 0.7);
+        } else {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        // 2. Hộp trắng chứa mã QR (đảm bảo vùng yên tĩnh / quiet zone rộng chuẩn ISO)
+        const boxSize = isCard ? 710 : 820;
+        const boxX = (W - boxSize) / 2;
+        const boxY = isCard ? 128 : 40;
+
+        if (isCard) {
+          ctx.save();
+          ctx.shadowColor = 'rgba(214, 65, 122, 0.18)';
+          ctx.shadowBlur = 34;
+          ctx.shadowOffsetY = 14;
+          ctx.fillStyle = '#ffffff';
+          drawRoundedRect(ctx, boxX, boxY, boxSize, boxSize, 42);
+          ctx.fill();
+          ctx.restore();
+
+          ctx.strokeStyle = 'rgba(255, 182, 210, 0.7)';
+          ctx.lineWidth = 3;
+          drawRoundedRect(ctx, boxX, boxY, boxSize, boxSize, 42);
+          ctx.stroke();
+
+          // Nhãn nhỏ xinh phía trên hộp QR
+          ctx.fillStyle = '#d6336c';
+          ctx.font = '700 28px Quicksand, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('♥  SCAN FOR A SWEET SURPRISE  ♥', W / 2, 86);
+        }
+
+        // 3. Vẽ các module QR bên trong với Quiet Zone tối thiểu 4 module
+        const quietModules = 4;
+        const totalModules = qr.size + quietModules * 2;
+        const cell = boxSize / totalModules;
+        const qrOriginX = boxX + quietModules * cell;
+        const qrOriginY = boxY + quietModules * cell;
+
+        // Vùng chừa nhỏ ở giữa để đặt biểu tượng trái tim (~6-8% diện tích, dư sức an toàn với Level H 30%)
+        const centerModule = (qr.size - 1) / 2;
+        const logoRadiusModules = Math.max(2.2, Math.min(3.5, qr.size * 0.115));
+
+        // Vẽ 3 mắt định vị sắc nét
+        drawFinderEye(ctx, qrOriginX, qrOriginY, cell, state.color);
+        drawFinderEye(ctx, qrOriginX + (qr.size - 7) * cell, qrOriginY, cell, state.color);
+        drawFinderEye(ctx, qrOriginX, qrOriginY + (qr.size - 7) * cell, cell, state.color);
+
+        // Vẽ các điểm dữ liệu
+        ctx.fillStyle = state.color;
+        for (let y = 0; y < qr.size; y += 1) {
+          for (let x = 0; x < qr.size; x += 1) {
+            if (!qr.modules[y][x]) continue;
+            if (isInFinder(x, y, qr.size)) continue;
+
+            // Bỏ qua vùng tâm nhỏ để đặt huy hiệu trái tim sạch đẹp
+            const distCenter = Math.hypot(x - centerModule, y - centerModule);
+            if (distCenter < logoRadiusModules) continue;
+
+            const px = qrOriginX + x * cell;
+            const py = qrOriginY + y * cell;
+
+            if (state.dotStyle === 'dots') {
+              ctx.beginPath();
+              ctx.arc(px + cell / 2, py + cell / 2, cell * 0.45, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              const pad = cell * 0.06;
+              drawRoundedRect(ctx, px + pad, py + pad, cell - pad * 2, cell - pad * 2, cell * 0.28);
+              ctx.fill();
+            }
+          }
+        }
+
+        // 4. Huy hiệu trái tim nổi bật chính giữa mã QR
+        const cx = qrOriginX + (qr.size * cell) / 2;
+        const cy = qrOriginY + (qr.size * cell) / 2;
+        const badgeR = logoRadiusModules * cell * 0.96;
+
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx, cy, badgeR, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffc5db';
+        ctx.lineWidth = Math.max(3, cell * 0.22);
+        ctx.stroke();
+
+        // Trái tim gradient hồng ngọt ngào
+        const heartGrad = ctx.createLinearGradient(cx, cy - badgeR * 0.6, cx, cy + badgeR * 0.6);
+        heartGrad.addColorStop(0, '#ff7aa8');
+        heartGrad.addColorStop(1, '#e63977');
+        drawHeart(ctx, cx, cy + badgeR * 0.05, badgeR * 1.12, heartGrad, 0, 1);
+        ctx.restore();
+
+        // 5. Chữ chú thích bên dưới thẻ
+        if (isCard) {
+          const cap = captionInput.value.trim();
+          const sub = subCaptionInput.value.trim();
+          ctx.textAlign = 'center';
+
+          if (cap) {
+            ctx.fillStyle = '#b9225c';
+            ctx.font = '700 42px Quicksand, sans-serif';
+            ctx.fillText(cap, W / 2, 940, W - 110);
+          }
+
+          if (sub) {
+            ctx.fillStyle = '#855269';
+            ctx.font = '600 26px Quicksand, sans-serif';
+            ctx.fillText(sub, W / 2, 1002, W - 120);
+          }
+        }
+
+        qrMeta.textContent = `✓ QR Version ${qr.version} • Sửa lỗi Cao 30% (Level H) • Quét cực nhạy`;
+      }
+
+      // Gắn sự kiện tùy chỉnh
+      urlInput.addEventListener('input', renderCard);
+      captionInput.addEventListener('input', renderCard);
+      subCaptionInput.addEventListener('input', renderCard);
+
+      document.getElementById('themeOptions').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-theme]');
+        if (!btn) return;
+        document.querySelectorAll('#themeOptions button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.theme = btn.dataset.theme;
+        renderCard();
+      });
+
+      document.getElementById('dotOptions').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-dot]');
+        if (!btn) return;
+        document.querySelectorAll('#dotOptions button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.dotStyle = btn.dataset.dot;
+        renderCard();
+      });
+
+      document.getElementById('colorOptions').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-color]');
+        if (!btn) return;
+        document.querySelectorAll('#colorOptions button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.color = btn.dataset.color;
+        renderCard();
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'ma-qr-trai-tim.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+
+      // Vẽ lại khi font Google Fonts tải xong cho thật đẹp
+      renderCard();
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(renderCard);
+      }
+    })();
+  </script>
+</body>
+</html>
