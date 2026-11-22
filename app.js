@@ -10,9 +10,9 @@
   const cfg = {
     photos: photoList,
     musicFile: (rawCfg.musicFile || '').trim(),
-    orbitPhotoCount: Math.max(6, Math.min(14, rawCfg.orbitPhotoCount || Math.max(8, photoList.length))),
-    fallingPhotoCount: Math.max(8, Math.min(24, rawCfg.fallingPhotoCount || 16)),
-    autoRotateSpeed: typeof rawCfg.autoRotateSpeed === 'number' ? rawCfg.autoRotateSpeed : 0.32,
+    orbitPhotoCount: Math.max(8, Math.min(14, rawCfg.orbitPhotoCount || Math.max(11, photoList.length))),
+    fallingPhotoCount: Math.max(18, Math.min(28, (rawCfg.fallingPhotoCount || 16) + 6)),
+    autoRotateSpeed: typeof rawCfg.autoRotateSpeed === 'number' ? rawCfg.autoRotateSpeed : 0.34,
   };
 
   const canvas = document.getElementById('scene5d');
@@ -20,14 +20,13 @@
   const musicToggle = document.getElementById('musicToggle');
   const musicLabel = document.getElementById('musicLabel');
   const burstTrigger = document.getElementById('burstTrigger');
-  const themeTrigger = document.getElementById('themeTrigger');
   const customAudio = document.getElementById('customAudio');
   const gestureHint = document.getElementById('gestureHint');
   const photoModal = document.getElementById('photoModal');
   const photoModalImg = document.getElementById('photoModalImg');
 
   // ============================================================
-  // 1. NHẠC NỀN LÃNG MẠN ĐA LỚP (SYNTH PAD + PIANO + HỘP NHẠC / MP3)
+  // 1. NHẠC NỀN LÃNG MẠN (PAD + PIANO + HỘP NHẠC / MP3)
   // ============================================================
   class RomanticSoundtrack {
     constructor(audioEl, musicFile) {
@@ -276,96 +275,7 @@
   });
 
   // ============================================================
-  // 2. BỘ MÀU HOLOGRAM (XANH BĂNG NHƯ VIDEO / HỒNG PHA LÊ / TỰ ĐỔI)
-  // ============================================================
-  function makeGlowSprite(innerColor, midColor, outerRgba) {
-    const S = 48;
-    const c = document.createElement('canvas');
-    c.width = S;
-    c.height = S;
-    const g = c.getContext('2d');
-    const grad = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-    grad.addColorStop(0, innerColor);
-    grad.addColorStop(0.2, innerColor);
-    grad.addColorStop(0.42, midColor);
-    grad.addColorStop(0.72, outerRgba);
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    g.fillStyle = grad;
-    g.fillRect(0, 0, S, S);
-    return c;
-  }
-
-  const PALETTES = {
-    // Tông xanh dương - băng sáng hologram giống video mẫu
-    blue: {
-      bgCenter: '#0d1e46',
-      bgMid: '#050c22',
-      bgEdge: '#01030a',
-      aurora1: 'rgba(42, 168, 255, 0.16)',
-      aurora2: 'rgba(110, 88, 255, 0.13)',
-      coreRgb: '78, 198, 255',
-      coreInner: '230, 248, 255',
-      discInner: '215, 246, 255',
-      discMid: '56, 178, 255',
-      discOuter: '37, 99, 235',
-      streakRgb: '115, 212, 255',
-      ring1: 'rgba(92, 206, 255, ',
-      ring2: 'rgba(182, 148, 255, ',
-      sprites: [
-        makeGlowSprite('#ffffff', '#67d8ff', 'rgba(37, 138, 255, 0.36)'),
-        makeGlowSprite('#eefaff', '#38bdf8', 'rgba(29, 78, 216, 0.34)'),
-        makeGlowSprite('#f5f3ff', '#93c5fd', 'rgba(99, 102, 241, 0.32)'),
-        makeGlowSprite('#ffffff', '#a5f3fc', 'rgba(56, 189, 248, 0.35)'),
-      ],
-      heartColors: ['#7dd3fc', '#38bdf8', '#a5f3fc', '#93c5fd', '#c4b5fd', '#ffffff'],
-    },
-    // Tông hồng pha lê cực quang lãng mạn
-    pink: {
-      bgCenter: '#340b42',
-      bgMid: '#170524',
-      bgEdge: '#05010a',
-      aurora1: 'rgba(255, 68, 172, 0.17)',
-      aurora2: 'rgba(255, 176, 122, 0.12)',
-      coreRgb: '255, 82, 174',
-      coreInner: '255, 232, 246',
-      discInner: '255, 224, 244',
-      discMid: '255, 84, 176',
-      discOuter: '198, 42, 158',
-      streakRgb: '255, 148, 216',
-      ring1: 'rgba(255, 118, 198, ',
-      ring2: 'rgba(255, 216, 148, ',
-      sprites: [
-        makeGlowSprite('#ffffff', '#ff5ca8', 'rgba(255, 36, 132, 0.36)'),
-        makeGlowSprite('#fff4fa', '#ff82c4', 'rgba(255, 76, 168, 0.34)'),
-        makeGlowSprite('#fff0ff', '#d97aff', 'rgba(186, 62, 255, 0.30)'),
-        makeGlowSprite('#ffffff', '#ffe08a', 'rgba(255, 180, 90, 0.34)'),
-      ],
-      heartColors: ['#ff4da6', '#ff80c0', '#ffb8e0', '#e085ff', '#ffe299', '#ffffff'],
-    },
-  };
-
-  // 0: Trái tim Hồng nổi bật trên nền hiệu ứng Xanh Neon | 1: Toàn bộ Xanh Hologram | 2: Tự luân phiên Hồng <-> Xanh
-  let themeMode = 0;
-  function getHeartPalette(t) {
-    if (themeMode === 1) return PALETTES.blue;
-    if (themeMode === 2) return Math.floor(t / 20) % 2 === 0 ? PALETTES.pink : PALETTES.blue;
-    return PALETTES.pink;
-  }
-
-  // Hệ hiệu ứng phía sau trái tim LUÔN mang ánh sáng Xanh Dương Neon 5D rực rỡ
-  function getBackBluePalette() {
-    return PALETTES.blue;
-  }
-
-  themeTrigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    themeMode = (themeMode + 1) % 3;
-    themeTrigger.textContent = themeMode === 0 ? '💖' : themeMode === 1 ? '💙' : '💎';
-    spawnTapBurst(width * 0.5, height * 0.5, 28);
-  });
-
-  // ============================================================
-  // 3. KHUNG THẺ ẢNH HOLOGRAM PHÁT SÁNG (CACHED CHO 60FPS)
+  // 2. KHUNG THẺ ẢNH ÁNH XANH BĂNG SANG TRỌNG
   // ============================================================
   function drawRoundedRect(c, x, y, w, h, r) {
     const rad = Math.min(r, w / 2, h / 2);
@@ -378,72 +288,44 @@
     c.closePath();
   }
 
-  function drawStarGlint(c, x, y, r, color, alpha, rot = 0) {
-    c.save();
-    c.translate(x, y);
-    c.rotate(rot);
-    c.globalAlpha = Math.max(0, Math.min(1, alpha));
-    c.fillStyle = color;
-    c.beginPath();
-    for (let i = 0; i < 4; i += 1) {
-      const a = (i * Math.PI) / 2;
-      const am = a + Math.PI / 4;
-      c.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-      c.lineTo(Math.cos(am) * r * 0.22, Math.sin(am) * r * 0.22);
-    }
-    c.closePath();
-    c.fill();
-    c.restore();
-  }
-
   function createFallbackCard() {
     const c = document.createElement('canvas');
-    c.width = 264;
-    c.height = 316;
+    c.width = 248;
+    c.height = 296;
     const g = c.getContext('2d');
-    const bg = g.createLinearGradient(0, 0, 264, 316);
-    bg.addColorStop(0, '#58c8ff');
-    bg.addColorStop(1, '#d84ea8');
-    drawRoundedRect(g, 18, 18, 228, 280, 24);
-    g.fillStyle = bg;
+    drawRoundedRect(g, 14, 14, 220, 268, 20);
+    g.fillStyle = '#0f2552';
     g.fill();
-    g.fillStyle = '#fff';
-    g.font = '700 84px sans-serif';
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    g.fillText('♥', 132, 160);
+    g.strokeStyle = 'rgba(147, 210, 255, 0.78)';
+    g.lineWidth = 3;
+    g.stroke();
     return c;
   }
 
-  function buildHologramPhotoCard(img) {
-    const W = 268;
-    const H = 318;
-    const PAD = 20;
+  function buildSleekPhotoCard(img) {
+    const W = 252;
+    const H = 300;
+    const PAD = 14;
     const c = document.createElement('canvas');
     c.width = W;
     c.height = H;
     const g = c.getContext('2d');
 
     g.save();
-    g.shadowColor = 'rgba(130, 200, 255, 0.85)';
-    g.shadowBlur = 22;
-    drawRoundedRect(g, PAD, PAD, W - PAD * 2, H - PAD * 2, 22);
-    const borderGrad = g.createLinearGradient(PAD, PAD, W - PAD, H - PAD);
-    borderGrad.addColorStop(0, '#eefaff');
-    borderGrad.addColorStop(0.35, '#8ee0ff');
-    borderGrad.addColorStop(0.7, '#ff9cd6');
-    borderGrad.addColorStop(1, '#fff0f8');
-    g.fillStyle = borderGrad;
+    g.shadowColor = 'rgba(72, 184, 255, 0.72)';
+    g.shadowBlur = 18;
+    drawRoundedRect(g, PAD, PAD, W - PAD * 2, H - PAD * 2, 18);
+    g.fillStyle = 'rgba(190, 234, 255, 0.88)';
     g.fill();
     g.restore();
 
-    const ix = PAD + 6;
-    const iy = PAD + 6;
-    const iw = W - (PAD + 6) * 2;
-    const ih = H - (PAD + 6) * 2;
+    const ix = PAD + 3.5;
+    const iy = PAD + 3.5;
+    const iw = W - (PAD + 3.5) * 2;
+    const ih = H - (PAD + 3.5) * 2;
 
     g.save();
-    drawRoundedRect(g, ix, iy, iw, ih, 17);
+    drawRoundedRect(g, ix, iy, iw, ih, 15);
     g.clip();
 
     const imgRatio = img.naturalWidth / Math.max(1, img.naturalHeight);
@@ -462,17 +344,8 @@
     }
 
     g.drawImage(img, sx, sy, sw, sh, ix, iy, iw, ih);
-
-    const sheen = g.createLinearGradient(ix, iy, ix + iw * 0.85, iy + ih * 0.65);
-    sheen.addColorStop(0, 'rgba(255, 255, 255, 0.26)');
-    sheen.addColorStop(0.4, 'rgba(190, 236, 255, 0.06)');
-    sheen.addColorStop(0.65, 'rgba(255, 255, 255, 0)');
-    g.fillStyle = sheen;
-    g.fillRect(ix, iy, iw, ih);
     g.restore();
 
-    drawStarGlint(g, PAD + 6, PAD + 8, 9, '#ffffff', 0.95);
-    drawStarGlint(g, W - PAD - 6, H - PAD - 8, 7, '#a5f3fc', 0.9);
     return c;
   }
 
@@ -482,7 +355,7 @@
     const img = new Image();
     img.decoding = 'async';
     img.onload = () => {
-      entry.card = buildHologramPhotoCard(img);
+      entry.card = buildSleekPhotoCard(img);
       entry.loaded = true;
     };
     img.src = src;
@@ -490,7 +363,7 @@
   });
 
   // ============================================================
-  // 4. ĐỘNG CƠ HOLOGRAM 5D (Y HỆT VIDEO + ẢNH XOAY + ẢNH RƠI 5D)
+  // 3. HỆ HẠT TRÁI TIM XANH + HIỆU ỨNG PHỦ KÍN 100% TOÀN MÀN HÌNH
   // ============================================================
   function rand(min, max) {
     return min + Math.random() * (max - min);
@@ -504,33 +377,101 @@
     return v < 0 ? 0 : v > 1 ? 1 : v;
   }
 
-  function smoothstep(edge0, edge1, x) {
-    const t = clamp01((x - edge0) / (edge1 - edge0));
+  function smoothstep(e0, e1, x) {
+    const t = clamp01((x - e0) / (e1 - e0));
     return t * t * (3 - 2 * t);
   }
 
-  function drawMiniHeart(c, x, y, size, color, alpha, rot = 0) {
-    c.save();
-    c.translate(x, y);
-    c.rotate(rot);
-    c.globalAlpha = Math.max(0, Math.min(1, alpha));
-    c.fillStyle = color;
-    c.beginPath();
-    c.moveTo(0, size * 0.5);
-    c.bezierCurveTo(-size * 0.78, size * 0.04, -size * 0.82, -size * 0.56, -size * 0.36, -size * 0.56);
-    c.bezierCurveTo(-size * 0.12, -size * 0.56, 0, -size * 0.32, 0, -size * 0.32);
-    c.bezierCurveTo(0, -size * 0.32, size * 0.12, -size * 0.56, size * 0.36, -size * 0.56);
-    c.bezierCurveTo(size * 0.82, -size * 0.56, size * 0.78, size * 0.04, 0, size * 0.5);
-    c.closePath();
-    c.fill();
-    c.restore();
+  function makePinpointSprite(core, mid, outer, size = 32) {
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, core);
+    grad.addColorStop(0.28, mid);
+    grad.addColorStop(0.64, outer);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, size, size);
+    return c;
   }
 
-  const PEDESTAL_Y = 1.18; // Đĩa bệ ánh sáng hologram nằm ngay dưới mũi trái tim, cân đẹp cả laptop & điện thoại
+  const STAR_SPRITES = [
+    makePinpointSprite('#ffffff', '#bae6fd', 'rgba(56, 189, 248, 0.38)', 28),
+    makePinpointSprite('#f0f9ff', '#60a5fa', 'rgba(37, 99, 235, 0.38)', 28),
+    makePinpointSprite('#e0f2fe', '#38bdf8', 'rgba(29, 78, 216, 0.35)', 28),
+    makePinpointSprite('#ffffff', '#93c5fd', 'rgba(59, 130, 246, 0.36)', 28),
+  ];
 
-  // Tạo 2.400 hạt trái tim 3D với đầy đủ tọa độ cho 3 pha:
-  // (1) Đổ thác xuống đĩa bệ -> (2) Cột ánh sáng bốc lên kết tinh trái tim -> (3) Dòng xoáy cực quang & pháo hoa bồ công anh!
-  function create3DHeartParticles(count) {
+  const BLUE_SMOKE_SPRITES = [
+    makePinpointSprite('rgba(186, 236, 255, 0.65)', 'rgba(56, 189, 248, 0.28)', 'rgba(29, 78, 216, 0.06)', 40),
+    makePinpointSprite('rgba(147, 197, 253, 0.58)', 'rgba(37, 130, 255, 0.26)', 'rgba(30, 64, 175, 0.05)', 40),
+    makePinpointSprite('rgba(224, 244, 255, 0.72)', 'rgba(96, 195, 255, 0.3)', 'rgba(37, 99, 235, 0.06)', 40),
+  ];
+
+  // Sprite trái tim phát sáng mềm phủ khắp không gian toàn màn hình
+  function makeGlowingHeartSprite(coreColor, glowColor) {
+    const S = 44;
+    const c = document.createElement('canvas');
+    c.width = S;
+    c.height = S;
+    const g = c.getContext('2d');
+    g.translate(S / 2, S / 2 + 2);
+    g.shadowColor = glowColor;
+    g.shadowBlur = 10;
+    g.fillStyle = coreColor;
+    const sz = 14;
+    g.beginPath();
+    g.moveTo(0, sz * 0.5);
+    g.bezierCurveTo(-sz * 0.78, sz * 0.04, -sz * 0.82, -sz * 0.56, -sz * 0.36, -sz * 0.56);
+    g.bezierCurveTo(-sz * 0.12, -sz * 0.56, 0, -sz * 0.32, 0, -sz * 0.32);
+    g.bezierCurveTo(0, -sz * 0.32, sz * 0.12, -sz * 0.56, sz * 0.36, -sz * 0.56);
+    g.bezierCurveTo(sz * 0.82, -sz * 0.56, sz * 0.78, sz * 0.04, 0, sz * 0.5);
+    g.closePath();
+    g.fill();
+    return c;
+  }
+
+  const HEART_SPRITES = [
+    makeGlowingHeartSprite('#bae6fd', '#38bdf8'),
+    makeGlowingHeartSprite('#7dd3fc', '#2563eb'),
+    makeGlowingHeartSprite('#e0f2fe', '#60a5fa'),
+    makeGlowingHeartSprite('#93c5fd', '#3b82f6'),
+  ];
+
+  const PEDESTAL_Y = 1.24;
+  const HEART_CENTER_Y = -0.18;
+
+  // Trạng thái màn hình & độ phủ không gian 3D theo đúng tỷ lệ màn hình (rộng hết cỡ trên laptop 16:9!)
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let unitScale = 220;
+  let focalLength = 900;
+  let worldSpanX = 5.4;
+  let worldSpanY = 3.8;
+
+  function updateDimensions() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Tỷ lệ tuyến tính chuẩn xác cho mọi kích cỡ màn hình (điện thoại, laptop, màn rời 2K/4K)
+    const aspect = width / Math.max(1, height);
+    unitScale = aspect >= 1 ? height * 0.225 : width * 0.255;
+
+    // Biên thế giới 3D tính chính xác theo số pixel màn hình để hiệu ứng phủ kín 100% từ mép này sang mép kia!
+    worldSpanX = (width * 0.5) / Math.max(1, unitScale) * 1.22;
+    worldSpanY = (height * 0.5) / Math.max(1, unitScale) * 1.22;
+  }
+  updateDimensions();
+
+  // 1) 4.000 hạt sao mịn tạo Trái Tim 3D lớn ở trung tâm + hạt tỏa rộng ra toàn màn hình
+  function createHeartStardust(count) {
     const SAMPLES = 720;
     const pts = [];
     const cumLen = [0];
@@ -539,9 +480,7 @@
       const hx = (16 * Math.pow(Math.sin(t), 3)) / 16;
       const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t) - 1.2) / 16;
       pts.push([hx, hy]);
-      if (i > 0) {
-        cumLen.push(cumLen[i - 1] + Math.hypot(hx - pts[i - 1][0], hy - pts[i - 1][1]));
-      }
+      if (i > 0) cumLen.push(cumLen[i - 1] + Math.hypot(hx - pts[i - 1][0], hy - pts[i - 1][1]));
     }
     const totalLen = cumLen[SAMPLES];
 
@@ -557,205 +496,194 @@
       return pts[lo];
     }
 
-    // 4 tâm pháo hoa bồ công anh (dandelion star-bursts giống 00:13-00:16 trong video!)
-    const bloomCenters = [
-      [-0.46, -0.62, 0.05],
-      [0.46, -0.62, -0.05],
-      [0.0, -0.28, 0.15],
-      [0.0, 0.22, -0.08],
+    const dandelionCenters = [
+      [-0.42, HEART_CENTER_Y - 0.26, 0.05],
+      [0.42, HEART_CENTER_Y - 0.26, -0.05],
+      [0.0, HEART_CENTER_Y + 0.1, 0.08],
     ];
 
     const list = [];
-    const rimCount = Math.floor(count * 0.42);
-    const auraStart = Math.floor(count * 0.88);
-
     for (let i = 0; i < count; i += 1) {
       const [hx, hy] = sampleRim();
-      const isRim = i < rimCount;
-      const isAura = i >= auraStart;
-
+      const shellType = Math.random();
       let r;
       let z;
       let jitter;
-      if (isRim) {
-        r = rand(0.95, 1.02);
-        z = rand(-0.15, 0.15);
-        jitter = 0.008;
-      } else if (isAura) {
-        r = rand(1.03, 1.22);
-        z = rand(-0.34, 0.34);
-        jitter = 0.04;
+
+      if (shellType < 0.36) {
+        r = rand(0.93, 1.02);
+        const dome = Math.sqrt(Math.max(0.02, 1 - Math.min(0.98, r * r))) * 0.58;
+        z = (Math.random() < 0.5 ? 1 : -1) * dome * rand(0.5, 1.0);
+        jitter = 0.015;
+      } else if (shellType < 0.88) {
+        r = Math.pow(Math.random(), 0.48);
+        const dome = Math.sqrt(Math.max(0, 1 - r * r)) * 0.6;
+        z = (Math.random() < 0.5 ? 1 : -1) * dome * rand(0.7, 1.04);
+        jitter = 0.024;
       } else {
-        r = Math.pow(Math.random(), 0.44);
-        const dome = Math.sqrt(Math.max(0, 1 - r * r)) * 0.56;
-        z = (Math.random() < 0.5 ? 1 : -1) * dome * rand(0.84, 1.04);
-        jitter = 0.016;
+        r = rand(0.15, 0.85);
+        const dome = Math.sqrt(Math.max(0, 1 - r * r)) * 0.48;
+        z = rand(-dome, dome);
+        jitter = 0.03;
       }
 
-      // Nâng tim lên (-0.30) để bay lơ lửng cực đẹp phía trên bệ ánh sáng PEDESTAL_Y
-      const bx = hx * r * 0.94 + rand(-jitter, jitter);
-      const by = hy * r * 0.94 - 0.30 + rand(-jitter, jitter);
-      const bz = z * 0.94;
+      // Phóng to kích thước trái tim 3D thêm 18% cho nổi bật giữa màn hình lớn
+      const bx = hx * r * 1.14 + rand(-jitter, jitter);
+      const by = hy * r * 1.14 + HEART_CENTER_Y + rand(-jitter, jitter);
+      const bz = z * 1.14;
 
-      // Vị trí nằm trải trên đĩa bệ ánh sáng (Pha 1: 00:02 trong video)
-      const discAng = rand(0, Math.PI * 2);
-      const discRad = Math.sqrt(Math.random()) * 1.18;
-      const dx0 = Math.cos(discAng) * discRad;
-      const dz0 = Math.sin(discAng) * discRad;
+      const floorAng = rand(0, Math.PI * 2);
+      const floorRad = Math.pow(Math.random(), 0.58) * 2.1;
+      const fx0 = Math.cos(floorAng) * floorRad;
+      const fz0 = Math.sin(floorAng) * floorRad;
 
-      // Nhánh xoáy dòng chảy plasma (Pha 3: 00:10-00:15 trong video)
-      const streamBranch = i % 3;
-      const bc = bloomCenters[i % bloomCenters.length];
+      const dc = dandelionCenters[i % dandelionCenters.length];
       const u = Math.random();
       const v = Math.random();
-      const theta = u * Math.PI * 2;
-      const phi = Math.acos(2 * v - 1);
-      const bloomR = rand(0.18, 0.62);
+      const th = u * Math.PI * 2;
+      const ph = Math.acos(2 * v - 1);
+      const dr = Math.pow(Math.random(), 0.42) * 0.68;
 
       list.push({
         bx,
         by,
         bz,
-        dx0,
-        dz0,
-        pillarRad: rand(0.12, 0.56),
-        pillarAng: discAng,
-        riseDelay: rand(0, 0.38),
-        // Mục tiêu bung pháo hoa bồ công anh 3D
-        fx: bc[0] + Math.sin(phi) * Math.cos(theta) * bloomR,
-        fy: bc[1] + Math.cos(phi) * bloomR,
-        fz: bc[2] + Math.sin(phi) * Math.sin(theta) * bloomR,
-        streamBranch,
-        streamPhase: rand(0, Math.PI * 2),
-        streamSpeed: rand(1.6, 3.2),
-        spriteIdx: i % 4,
-        size: isRim ? rand(2.9, 5.6) : isAura ? rand(2.5, 4.8) : rand(2.7, 5.2),
-        twinklePhase: rand(0, Math.PI * 2),
-        twinkleSpeed: rand(2.4, 5.8),
-        sparkle: isRim ? Math.random() < 0.12 : Math.random() < 0.05,
-        isRim,
-        isAura,
-        prevSx: null,
-        prevSy: null,
+        fx0,
+        fz0,
+        colRad: rand(0.08, 0.62),
+        colAng: floorAng,
+        delay: rand(0, 0.45),
+        dx: dc[0] + Math.sin(ph) * Math.cos(th) * dr,
+        dy: dc[1] + Math.cos(ph) * dr,
+        dz: dc[2] + Math.sin(ph) * Math.sin(th) * dr,
+        isDandelion: i % 3 !== 0,
+        size: rand(1.0, 2.5),
+        glowy: Math.random() < 0.25,
+        spriteIdx: i % STAR_SPRITES.length,
+        color: pick(['#ffffff', '#e0f2fe', '#93c5fd', '#60a5fa', '#38bdf8', '#3b82f6']),
+        twPhase: rand(0, Math.PI * 2),
+        twSpeed: rand(2.2, 5.5),
       });
     }
     return list;
   }
 
-  // Các hạt ánh sáng xoáy liên tục trên đĩa bệ hologram phía dưới tim & bốc lên cột sáng
-  function createPedestalParticles(count) {
-    return Array.from({ length: count }, (_, i) => ({
-      angle: rand(0, Math.PI * 2),
-      radius: Math.sqrt(Math.random()) * 1.12,
-      speed: rand(0.5, 1.4) * (i % 2 === 0 ? 1 : -0.6),
-      rise: Math.random() < 0.34,
-      riseProg: rand(0, 1),
-      riseSpeed: rand(0.28, 0.68),
-      size: rand(2.2, 5.0),
-      spriteIdx: i % 4,
-      phase: rand(0, Math.PI * 2),
-    }));
+  // 2) LÀN SƯƠNG LỬA XANH CUỘN CHẢY QUANH TRÁI TIM (00:09 -> 00:15 video)
+  function createBlueSilkFlameRibbons(count) {
+    const list = [];
+    for (let i = 0; i < count; i += 1) {
+      const p = {
+        x: 0,
+        y: 0,
+        z: 0,
+        life: rand(0, 1),
+        maxLife: rand(1.6, 3.0),
+        seed: rand(0, Math.PI * 2),
+        stream: i % 5,
+        side: i % 2 === 0 ? 1 : -1,
+        speed: rand(0.72, 1.28),
+        size: rand(6, 18),
+        isSpark: i % 3 === 0,
+        spriteIdx: i % BLUE_SMOKE_SPRITES.length,
+      };
+      resetFluidParticle(p, true);
+      list.push(p);
+    }
+    return list;
   }
 
-  // Hai vòng thiên hà 3D xoay quanh trái tim
-  function createGalaxyRings() {
-    const rings = [
-      { radius: 1.82, tiltX: 0.34, tiltZ: -0.2, speed: 0.52, count: 120 },
-      { radius: 2.46, tiltX: -0.26, tiltZ: 0.24, speed: -0.36, count: 130 },
-    ];
-    rings.forEach((ring) => {
-      ring.particles = [];
-      for (let i = 0; i < ring.count; i += 1) {
-        ring.particles.push({
-          angle: (Math.PI * 2 * i) / ring.count + rand(-0.08, 0.08),
-          radOffset: rand(-0.12, 0.12),
-          yOffset: rand(-0.07, 0.07),
-          size: rand(3.0, 6.8),
-          phase: rand(0, Math.PI * 2),
-          bright: Math.random() < 0.16,
-        });
-      }
-    });
-    return rings;
+  function resetFluidParticle(p, randomProgress) {
+    const a = rand(0, Math.PI * 2);
+    const r = rand(0.08, 0.75);
+    p.x = Math.cos(a) * r;
+    p.z = Math.sin(a) * r - 0.16;
+    p.y = PEDESTAL_Y - rand(0.02, 0.24);
+    p.life = randomProgress ? rand(0, p.maxLife) : 0;
   }
 
-  function createStarfield(count) {
-    return Array.from({ length: count }, () => ({
-      nx: rand(0, 1),
-      ny: rand(0, 1),
-      depth: rand(0.18, 1.0),
-      r: rand(0.7, 2.2),
-      phase: rand(0, Math.PI * 2),
-      speed: rand(1.4, 4.0),
-      color: pick(['#ffffff', '#d6f4ff', '#ffd6ec', '#c4b5fd', '#fff0c2']),
-    }));
+  // 3) DẢI NGÂN HÀ & BỤI SAO 3D PHỦ KÍN 100% TOÀN MÀN HÌNH (xóa sổ hoàn toàn vùng đen trống!)
+  //    Gồm 1.400 hạt bụi sao xanh + đom đóm phát sáng + trái tim xanh mini bay khắp mọi góc màn hình!
+  function createFullScreenGalaxyField(starCount, heartCount) {
+    const field = [];
+    for (let i = 0; i < starCount; i += 1) {
+      const isRiver = i < starCount * 0.55; // 55% tạo thành 3 dải sông ngân hà xanh chảy uốn lượn ngang dọc toàn màn hình
+      const band = i % 3;
+      field.push({
+        isRiver,
+        band,
+        u: rand(-1, 1), // Tỷ lệ chuẩn hóa theo worldSpanX / worldSpanY
+        v: rand(-1, 1),
+        z: rand(-3.6, 2.1),
+        speed: rand(0.04, 0.14) * (i % 2 === 0 ? 1 : -1),
+        swayPhase: rand(0, Math.PI * 2),
+        swaySpeed: rand(0.8, 2.2),
+        size: isRiver ? rand(1.6, 4.4) : rand(1.2, 3.8),
+        glowy: Math.random() < 0.48,
+        spriteIdx: i % STAR_SPRITES.length,
+        color: pick(['#ffffff', '#bae6fd', '#7dd3fc', '#60a5fa', '#38bdf8']),
+      });
+    }
+
+    const floatingHearts = [];
+    for (let i = 0; i < heartCount; i += 1) {
+      floatingHearts.push({
+        u: rand(-1.05, 1.05),
+        v: rand(-1.05, 1.05),
+        z: rand(-3.2, 1.9),
+        vy: rand(0.05, 0.14),
+        swayAmp: rand(0.04, 0.12),
+        swayPhase: rand(0, Math.PI * 2),
+        size: rand(9, 24),
+        rot: rand(-0.45, 0.45),
+        rotSpeed: rand(-0.7, 0.7),
+        spriteIdx: i % HEART_SPRITES.length,
+        alpha: rand(0.35, 0.85),
+      });
+    }
+
+    return { field, floatingHearts };
   }
 
-  function createFloatingMiniHearts(count) {
-    return Array.from({ length: count }, () => ({
-      x: rand(-3.5, 3.5),
-      y: rand(-3.5, 3.5),
-      z: rand(-2.8, 2.2),
-      vy: rand(-0.32, -0.14),
-      swayAmp: rand(0.15, 0.38),
-      swayPhase: rand(0, Math.PI * 2),
-      size: rand(7, 15),
-      rot: rand(-0.4, 0.4),
-      rotSpeed: rand(-0.8, 0.8),
-      colorIdx: (Math.random() * 6) | 0,
-      alpha: rand(0.32, 0.78),
-    }));
-  }
-
-  // 11 ảnh xoay quanh trái tim (quỹ đạo rộng thoáng để lộ trọn bệ ánh sáng & trái tim 3D!)
+  // 4) 11 ảnh xoay 3D rộng quanh trái tim + 22 ảnh rơi 5D trải đều từ mép trái sang mép phải màn hình!
   function createOrbitPhotos(count) {
     const list = [];
-    const baseRadius = count >= 10 ? 2.38 : 2.16;
     for (let i = 0; i < count; i += 1) {
       list.push({
         photoIndex: i % loadedPhotos.length,
         baseAngle: (Math.PI * 2 * i) / count,
-        radiusMul: baseRadius + (i % 2 === 0 ? 0.12 : -0.1),
-        yOffset: (i % 2 === 0 ? 0.24 : -0.24) - 0.1,
-        yBobAmp: rand(0.08, 0.14),
+        radiusOffset: i % 2 === 0 ? 0.14 : -0.1,
+        yOffset: (i % 2 === 0 ? 0.28 : -0.28) + HEART_CENTER_Y,
+        yBobAmp: rand(0.08, 0.16),
         yBobPhase: rand(0, Math.PI * 2),
         tiltPhase: rand(0, Math.PI * 2),
-        trailTimer: rand(0, 0.2),
       });
     }
     return list;
   }
 
-  // Dòng ảnh rơi 5D từ trên xuống dưới
-  function createFallingPhoto(randomY) {
+  function createFallingPhoto(randomY, idx = 0, total = 22) {
     const layer = Math.random();
-    const zDepth = layer < 0.44 ? rand(-3.0, -1.4) : layer < 0.82 ? rand(-1.3, 0.8) : rand(0.9, 1.9);
+    const zDepth = layer < 0.42 ? rand(-3.0, -1.3) : layer < 0.8 ? rand(-1.2, 0.8) : rand(0.9, 1.85);
+    // Chia đều theo chiều ngang toàn màn hình để góc trái, giữa, phải đều luôn có ảnh rơi!
+    const laneU = ((idx + rand(0.15, 0.85)) / Math.max(1, total)) * 2 - 1;
     return {
-      photoIndex: (Math.random() * loadedPhotos.length) | 0,
-      x: rand(-3.3, 3.3),
-      y: randomY ? rand(-3.7, 3.7) : rand(-4.4, -3.3),
+      photoIndex: (idx + ((Math.random() * loadedPhotos.length) | 0)) % loadedPhotos.length,
+      u: laneU * 0.96,
+      y: randomY ? rand(-worldSpanY, worldSpanY) : rand(-worldSpanY - 0.9, -worldSpanY),
       z: zDepth,
-      vy: rand(0.38, 0.76) * (zDepth > 0.6 ? 1.1 : 0.88),
-      swayAmp: rand(0.24, 0.56),
-      swayFreq: rand(0.6, 1.4),
+      vy: rand(0.38, 0.76) * (zDepth > 0.6 ? 1.12 : 0.9),
+      swayAmp: rand(0.14, 0.36),
+      swayFreq: rand(0.6, 1.35),
       swayPhase: rand(0, Math.PI * 2),
       spinPhase: rand(0, Math.PI * 2),
-      spinSpeed: rand(0.75, 1.6),
-      rotAmp: rand(0.14, 0.32),
-      scaleMul: rand(0.45, 0.7),
-      trailTimer: 0,
+      spinSpeed: rand(0.7, 1.5),
+      rotAmp: rand(0.14, 0.3),
+      scaleMul: rand(0.46, 0.72),
     };
   }
 
-  // Trạng thái sân khấu & camera 5D
-  let width = window.innerWidth;
-  let height = window.innerHeight;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-  let unitScale = 160;
-  let focalLength = 860;
-
   let camRotY = 0;
-  let camRotX = 0.24; // Góc nhìn thấy cực rõ bệ ánh sáng 3D bên dưới trái tim!
+  let camRotX = 0.2;
   let velY = 0;
   let velX = 0;
   let targetParallaxX = 0;
@@ -765,40 +693,172 @@
   let zoom = 1;
   let targetZoom = 1;
 
-  let manualSwirlBoost = 0;
-  let elapsed = parseFloat(new URLSearchParams(location.search).get('t')) || 0;
+  let elapsed = parseFloat(new URLSearchParams(location.search).get('t')) || 3.5;
+  let manualAuraBoost = 0;
   let lastTime = performance.now();
-  let nextMeteorTime = 1.8;
-  let lastBeatPulse = 0;
+  let nextMeteorTime = 0.8;
 
-  const heartParticles = create3DHeartParticles(2400);
-  const pedestalParticles = createPedestalParticles(260);
-  const galaxyRings = createGalaxyRings();
-  const stars = createStarfield(160);
-  const miniHearts = createFloatingMiniHearts(24);
+  const heartDust = createHeartStardust(3800);
+  const blueFlames = createBlueSilkFlameRibbons(920);
+  const { field: galaxyField, floatingHearts } = createFullScreenGalaxyField(1350, 68);
   const orbitPhotos = createOrbitPhotos(cfg.orbitPhotoCount);
-  const fallingPhotos = Array.from({ length: cfg.fallingPhotoCount }, () => createFallingPhoto(true));
+  const fallingPhotos = Array.from({ length: cfg.fallingPhotoCount }, (_, idx) =>
+    createFallingPhoto(true, idx, cfg.fallingPhotoCount)
+  );
 
-  const bursts = [];
-  const shockwaves = [];
+  const tapSparks = [];
   const meteors = [];
+  const fireworkRockets = [];
+  const fireworkSparks = [];
+  const fireworkFlashes = [];
   const renderQueue = [];
   let clickableCards = [];
+  let nextFireworkTime = 0.25;
 
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.floor(width * dpr);
-    canvas.height = Math.floor(height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const FIREWORK_PALETTES = [
+    ['#ffffff', '#bae6fd', '#38bdf8', '#0284c7'], // Xanh băng kim cương
+    ['#fff0f7', '#ff77bc', '#ff2e88', '#fde047'], // Hồng ánh kim
+    ['#fef9c3', '#fde047', '#fbbf24', '#38bdf8'], // Vàng hoàng kim & xanh
+    ['#f5f3ff', '#c084fc', '#818cf8', '#67e8f9'], // Tím ngân hà & lam
+  ];
 
-    const minDim = Math.min(width, height);
-    unitScale = Math.max(88, Math.min(168, minDim * 0.195));
-    focalLength = Math.max(620, minDim * 1.46);
+  // Nổ 1 quả pháo hoa rực rỡ (kiểu Hoa Cúc Liễu Rủ, Trái Tim, hoặc Sao Bồ Công Anh)
+  function detonateFirework(x, y, forceStyle) {
+    const pal = pick(FIREWORK_PALETTES);
+    const style = forceStyle || (Math.random() < 0.34 ? 'heart' : Math.random() < 0.68 ? 'willow' : 'starburst');
+
+    // Chớp sáng mềm tại tâm nổ
+    fireworkFlashes.push({
+      x,
+      y,
+      r: rand(95, 165),
+      color: pal[1],
+      life: 0,
+      maxLife: 0.42,
+    });
+
+    if (style === 'heart') {
+      // Pháo hoa nở thành hình Trái Tim lớn trên bầu trời
+      const count = 64;
+      const baseSpd = rand(9.5, 13.5);
+      const tilt = rand(-0.22, 0.22);
+      const cosT = Math.cos(tilt);
+      const sinT = Math.sin(tilt);
+      for (let i = 0; i < count; i += 1) {
+        const t = (Math.PI * 2 * i) / count;
+        const hx = 16 * Math.pow(Math.sin(t), 3);
+        const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        const rx = hx * cosT - hy * sinT;
+        const ry = hx * sinT + hy * cosT;
+        const jitter = rand(0.92, 1.08);
+        fireworkSparks.push({
+          x,
+          y,
+          vx: rx * baseSpd * jitter,
+          vy: ry * baseSpd * jitter,
+          gravity: 85,
+          drag: 0.952,
+          size: rand(1.6, 2.9),
+          color: i % 5 === 0 ? pal[0] : pal[1 + (i % (pal.length - 1))],
+          life: 0,
+          maxLife: rand(1.25, 1.85),
+          crackle: i % 3 === 0,
+          starTip: i % 6 === 0,
+          trail: [[x, y]],
+        });
+      }
+    } else {
+      // Pháo hoa Hoa Cúc 2 tầng & Liễu Rủ kéo đuôi cong mềm mại
+      const outerCount = style === 'willow' ? 72 : 60;
+      const maxSpd = style === 'willow' ? rand(170, 260) : rand(150, 235);
+
+      for (let i = 0; i < outerCount; i += 1) {
+        const a = (Math.PI * 2 * i) / outerCount + rand(-0.08, 0.08);
+        const ringLayer = i % 3 === 0 ? rand(0.45, 0.68) : rand(0.82, 1.08);
+        const sp = maxSpd * ringLayer;
+        fireworkSparks.push({
+          x,
+          y,
+          vx: Math.cos(a) * sp,
+          vy: Math.sin(a) * sp,
+          gravity: style === 'willow' ? 135 : 95,
+          drag: style === 'willow' ? 0.962 : 0.955,
+          size: rand(1.5, 3.0),
+          color: ringLayer < 0.7 ? pal[0] : pal[1 + (i % (pal.length - 1))],
+          life: 0,
+          maxLife: style === 'willow' ? rand(1.45, 2.2) : rand(1.15, 1.75),
+          crackle: Math.random() < 0.4,
+          starTip: style === 'starburst' && i % 4 === 0,
+          trail: [[x, y]],
+        });
+      }
+    }
   }
-  resize();
-  window.addEventListener('resize', resize);
+
+  // Bắn quả đạn pháo hoa từ dưới bay vọt lên trời rồi phát nổ
+  function launchFireworkRocket(targetX, targetY, forceStyle) {
+    const tx = typeof targetX === 'number' ? targetX : rand(width * 0.08, width * 0.92);
+    const ty = typeof targetY === 'number' ? targetY : rand(height * 0.12, height * 0.56);
+    const sx = tx + rand(-width * 0.08, width * 0.08);
+    const sy = height + 10;
+    const dur = rand(0.55, 0.85);
+    fireworkRockets.push({
+      x: sx,
+      y: sy,
+      sx,
+      sy,
+      tx,
+      ty,
+      life: 0,
+      maxLife: dur,
+      color: pick(['#bae6fd', '#fde047', '#ff80c0', '#ffffff']),
+      forceStyle,
+      trail: [[sx, sy]],
+    });
+  }
+
+  function launchGrandFinale() {
+    detonateFirework(width * 0.5, height * 0.34, 'heart');
+    detonateFirework(width * 0.2, height * 0.28, 'willow');
+    detonateFirework(width * 0.8, height * 0.28, 'willow');
+    launchFireworkRocket(width * 0.34, height * 0.22, 'starburst');
+    launchFireworkRocket(width * 0.66, height * 0.22, 'heart');
+  }
+
+  // Mở sẵn 3 bông pháo hoa rực rỡ ngay giây đầu tiên trên màn hình!
+  detonateFirework(width * 0.18, height * 0.26, 'willow');
+  detonateFirework(width * 0.82, height * 0.24, 'heart');
+  detonateFirework(width * 0.5, height * 0.18, 'starburst');
+  for (let pre = 0; pre < 18; pre += 1) {
+    for (let i = fireworkSparks.length - 1; i >= 0; i -= 1) {
+      const s = fireworkSparks[i];
+      s.life += 0.025;
+      s.vx *= Math.pow(s.drag, 1.5);
+      s.vy = s.vy * Math.pow(s.drag, 1.5) + s.gravity * 0.025;
+      s.x += s.vx * 0.025;
+      s.y += s.vy * 0.025;
+      s.trail.push([s.x, s.y]);
+      if (s.trail.length > 7) s.trail.shift();
+    }
+  }
+
+  window.addEventListener('resize', updateDimensions);
+
+  // Làm nóng sẵn dòng chảy khói xanh
+  for (let w = 0; w < 35; w += 1) {
+    for (let i = 0; i < blueFlames.length; i += 1) {
+      const p = blueFlames[i];
+      p.life += 0.04 * p.speed;
+      if (p.life >= p.maxLife || p.y < -1.55) resetFluidParticle(p, false);
+      const prog = p.life / p.maxLife;
+      const heartEnv = Math.sin(prog * Math.PI);
+      const targetAngle = prog * 4.4 + p.stream * 1.25;
+      const targetRadius = 0.24 + heartEnv * 0.82;
+      p.x += (Math.cos(targetAngle) * targetRadius - p.x) * 0.14;
+      p.z += (Math.sin(targetAngle) * targetRadius * 0.65 - 0.16 - p.z) * 0.14;
+      p.y -= 0.85 * 0.04;
+    }
+  }
 
   function project3D(wx, wy, wz, cosY, sinY, cosX, sinX) {
     const x1 = wx * cosY - wz * sinY;
@@ -806,11 +866,12 @@
     const y2 = wy * cosX - z1 * sinX;
     const z2 = wy * sinX + z1 * cosX;
 
-    const camDist = 5.4 / zoom;
+    const camDist = 5.3 / zoom;
     const pz = z2 + camDist;
     if (pz <= 0.35) return null;
 
-    const scale = (focalLength / (pz * unitScale)) * (unitScale / 145);
+    // Phép chiếu phối cảnh chuẩn: tại tâm (z2 = 0) thì scale = 1.0 * zoom
+    const scale = 5.3 / pz;
     const sx = width * 0.5 + x1 * unitScale * scale;
     const sy = height * 0.5 + y2 * unitScale * scale;
     return { sx, sy, z: pz, scale };
@@ -819,62 +880,49 @@
   function spawnMeteor() {
     const fromLeft = Math.random() < 0.55;
     meteors.push({
-      x: fromLeft ? rand(-40, width * 0.55) : rand(width * 0.45, width + 40),
-      y: rand(-20, height * 0.36),
-      vx: (fromLeft ? 1 : -1) * rand(520, 880),
-      vy: rand(220, 420),
-      len: rand(95, 175),
+      x: fromLeft ? rand(-20, width * 0.7) : rand(width * 0.3, width + 20),
+      y: rand(-20, height * 0.65),
+      vx: (fromLeft ? 1 : -1) * rand(540, 920),
+      vy: rand(200, 420),
+      len: rand(110, 190),
       life: 0,
       maxLife: rand(0.65, 1.15),
     });
   }
 
-  function spawnTapBurst(x, y, count = 24) {
-    const pal = getHeartPalette(elapsed);
-    shockwaves.push({ x, y, r: 10, maxR: 155, life: 0, maxLife: 0.78, color: pal.coreRgb });
-    shockwaves.push({ x, y, r: 4, maxR: 105, life: 0, maxLife: 0.56, color: '115, 224, 255' });
+  function spawnBlueSparkBurst(x, y, count = 36) {
+    detonateFirework(x, y);
     for (let i = 0; i < count; i += 1) {
-      const a = (Math.PI * 2 * i) / count + rand(-0.24, 0.24);
-      const sp = rand(80, 290);
-      bursts.push({
-        kind: i % 3 === 0 ? 'star' : 'heart',
+      const a = (Math.PI * 2 * i) / count + rand(-0.2, 0.2);
+      const sp = rand(50, 240);
+      tapSparks.push({
         x,
         y,
+        px: x,
+        py: y,
         vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp - rand(28, 105),
-        gravity: 165,
-        drag: 0.962,
-        size: i % 3 === 0 ? rand(5, 11) : rand(9, 22),
-        rot: rand(-0.5, 0.5),
-        rotSpeed: rand(-3.2, 3.2),
-        color: pick(pal.heartColors),
+        vy: Math.sin(a) * sp - rand(10, 60),
+        gravity: 110,
+        drag: 0.96,
+        size: rand(1.3, 3.0),
+        color: pick(['#ffffff', '#bae6fd', '#60a5fa', '#38bdf8']),
         life: 0,
-        maxLife: rand(0.9, 1.65),
+        maxLife: rand(0.65, 1.35),
       });
     }
-  }
-
-  function triggerVortexSupernova() {
-    const pal = getHeartPalette(elapsed);
-    manualSwirlBoost = 1.0;
-    const cx = width * 0.5;
-    const cy = height * 0.48;
-    shockwaves.push({ x: cx, y: cy, r: 22, maxR: Math.max(width, height) * 0.62, life: 0, maxLife: 1.25, color: '56, 204, 255' });
-    shockwaves.push({ x: cx, y: cy, r: 10, maxR: Math.max(width, height) * 0.42, life: 0, maxLife: 0.95, color: pal.coreRgb });
-    spawnTapBurst(cx, cy, 46);
-    spawnMeteor();
-    setTimeout(spawnMeteor, 240);
-    if (navigator.vibrate) navigator.vibrate([22, 30, 35]);
   }
 
   burstTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
     music.tryAutoStart();
-    triggerVortexSupernova();
+    manualAuraBoost = 1.0;
+    launchGrandFinale();
+    spawnMeteor();
+    if (navigator.vibrate) navigator.vibrate(20);
   });
 
   // ============================================================
-  // 5. TƯƠNG TÁC 5D (XOAY 360°, VỆT SAO CHỔI, ZOOM, MỞ ẢNH)
+  // 4. TƯƠNG TÁC 5D (XOAY 360°, ZOOM, CHẠM BẮN HẠT SÁNG, BẤM ẢNH PHÓNG TO)
   // ============================================================
   let hasInteracted = false;
   let isDragging = false;
@@ -883,7 +931,6 @@
   let downY = 0;
   let lastX = 0;
   let lastY = 0;
-  let lastDragSparkle = 0;
   let pinchDist = 0;
   const activePointers = new Map();
 
@@ -897,7 +944,7 @@
 
   setTimeout(() => {
     gestureHint.classList.add('is-hidden');
-  }, 7500);
+  }, 6500);
 
   canvas.addEventListener('pointerdown', (e) => {
     markInteracted();
@@ -943,33 +990,12 @@
       dragMoved += Math.hypot(dx, dy);
 
       camRotY += dx * 0.0065;
-      camRotX = Math.max(-0.85, Math.min(0.85, camRotX + dy * 0.0055));
+      camRotX = Math.max(-0.82, Math.min(0.82, camRotX + dy * 0.0052));
       velY = dx * 0.0046;
-      velX = dy * 0.0036;
-
-      const now = performance.now();
-      if (now - lastDragSparkle > 24 && bursts.length < 240) {
-        lastDragSparkle = now;
-        const pal = getHeartPalette(elapsed);
-        bursts.push({
-          kind: Math.random() < 0.45 ? 'star' : 'heart',
-          x: e.clientX + rand(-6, 6),
-          y: e.clientY + rand(-6, 6),
-          vx: rand(-22, 22),
-          vy: rand(-35, 10),
-          gravity: 20,
-          drag: 0.96,
-          size: rand(5, 11),
-          rot: rand(-0.4, 0.4),
-          rotSpeed: rand(-2, 2),
-          color: pick(pal.heartColors),
-          life: 0,
-          maxLife: rand(0.55, 0.95),
-        });
-      }
+      velX = dy * 0.0034;
     } else if (e.pointerType === 'mouse') {
-      targetParallaxX = (e.clientX / width - 0.5) * 0.25;
-      targetParallaxY = (e.clientY / height - 0.5) * 0.16;
+      targetParallaxX = (e.clientX / width - 0.5) * 0.22;
+      targetParallaxY = (e.clientY / height - 0.5) * 0.14;
     }
   });
 
@@ -993,8 +1019,8 @@
             break;
           }
         }
-        spawnTapBurst(downX, downY, 26);
-        if (navigator.vibrate) navigator.vibrate(15);
+        spawnBlueSparkBurst(downX, downY, 32);
+        if (navigator.vibrate) navigator.vibrate(14);
         if (hitPhoto) {
           photoModalImg.src = hitPhoto;
           photoModal.hidden = false;
@@ -1019,8 +1045,8 @@
     'deviceorientation',
     (e) => {
       if (typeof e.gamma === 'number' && typeof e.beta === 'number') {
-        targetParallaxX = Math.max(-0.28, Math.min(0.28, (e.gamma / 45) * 0.25));
-        targetParallaxY = Math.max(-0.2, Math.min(0.2, ((e.beta - 45) / 45) * 0.16));
+        targetParallaxX = Math.max(-0.26, Math.min(0.26, (e.gamma / 45) * 0.22));
+        targetParallaxY = Math.max(-0.18, Math.min(0.18, ((e.beta - 45) / 45) * 0.14));
       }
     },
     { passive: true }
@@ -1031,320 +1057,201 @@
   });
 
   // ============================================================
-  // 6. HIỆU ỨNG XANH DƯƠNG NEON 5D PHÍA SAU TRÁI TIM
-  //    (Đường hầm tam giác xanh 3D + Tia sáng hào quang xanh + Sóng cực quang xanh)
+  // 5. NỀN CỰC QUANG XANH ĐA TẦNG PHỦ KÍN 4 GÓC MÀN HÌNH + ĐĨA SÁNG
   // ============================================================
-  function drawBlueBackdropBehindHeart(t, beat, energyBoost, shiftX, shiftY) {
-    // 1. Nền vũ trụ xanh thẫm sâu hút
-    const bgGrad = ctx.createRadialGradient(
-      width * 0.5 + shiftX,
-      height * 0.46 + shiftY,
-      10,
+  function drawFullScreenCosmicBlueNebula(t, beat, flameIntensity) {
+    const bg = ctx.createRadialGradient(
+      width * 0.5,
+      height * 0.48,
+      0,
       width * 0.5,
       height * 0.5,
-      Math.max(width, height) * 0.92
+      Math.max(width, height) * 0.95
     );
-    bgGrad.addColorStop(0, '#0c2758');
-    bgGrad.addColorStop(0.36, '#061433');
-    bgGrad.addColorStop(0.72, '#03081a');
-    bgGrad.addColorStop(1, '#01030a');
-    ctx.fillStyle = bgGrad;
+    bg.addColorStop(0, '#091d46');
+    bg.addColorStop(0.45, '#040d24');
+    bg.addColorStop(1, '#01040d');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
+    // 5 đám mây tinh vân xanh lam / xanh băng trôi bồng bềnh ở cả 4 góc và trung tâm (không còn góc nào đen xì!)
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
 
-    const cx = width * 0.5 + shiftX * 0.7;
-    const cy = height * 0.46 + shiftY * 0.7;
+    const clouds = [
+      {
+        x: width * (0.18 + 0.08 * Math.sin(t * 0.24)),
+        y: height * (0.24 + 0.07 * Math.cos(t * 0.2)),
+        r: Math.max(width, height) * 0.46,
+        c1: 'rgba(37, 130, 255, 0.16)',
+        c2: 'rgba(14, 65, 175, 0.06)',
+      },
+      {
+        x: width * (0.82 + 0.08 * Math.cos(t * 0.22)),
+        y: height * (0.26 + 0.08 * Math.sin(t * 0.19)),
+        r: Math.max(width, height) * 0.44,
+        c1: 'rgba(56, 189, 248, 0.15)',
+        c2: 'rgba(29, 78, 216, 0.06)',
+      },
+      {
+        x: width * (0.2 + 0.09 * Math.cos(t * 0.21)),
+        y: height * (0.78 + 0.07 * Math.sin(t * 0.25)),
+        r: Math.max(width, height) * 0.45,
+        c1: 'rgba(59, 130, 246, 0.15)',
+        c2: 'rgba(30, 58, 138, 0.06)',
+      },
+      {
+        x: width * (0.8 + 0.08 * Math.sin(t * 0.26)),
+        y: height * (0.76 + 0.07 * Math.cos(t * 0.23)),
+        r: Math.max(width, height) * 0.46,
+        c1: 'rgba(34, 175, 255, 0.15)',
+        c2: 'rgba(37, 99, 235, 0.06)',
+      },
+      {
+        x: width * 0.5,
+        y: height * 0.46,
+        r: unitScale * (2.4 + flameIntensity * 0.7 + beat * 0.25),
+        c1: `rgba(56, 178, 255, ${0.18 + flameIntensity * 0.16})`,
+        c2: 'rgba(29, 78, 216, 0.07)',
+      },
+    ];
 
-    // 2. Dải cực quang xanh lam - lục bảo uốn lượn phía sau trái tim
-    const ax1 = width * (0.28 + 0.14 * Math.sin(t * 0.32));
-    const ay1 = height * (0.25 + 0.09 * Math.cos(t * 0.24));
-    const g1 = ctx.createRadialGradient(ax1, ay1, 10, ax1, ay1, Math.max(width, height) * 0.54);
-    g1.addColorStop(0, 'rgba(0, 212, 255, 0.22)');
-    g1.addColorStop(0.5, 'rgba(37, 99, 235, 0.11)');
-    g1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = g1;
-    ctx.fillRect(0, 0, width, height);
-
-    const ax2 = width * (0.72 + 0.12 * Math.cos(t * 0.27));
-    const ay2 = height * (0.72 + 0.1 * Math.sin(t * 0.22));
-    const g2 = ctx.createRadialGradient(ax2, ay2, 10, ax2, ay2, Math.max(width, height) * 0.52);
-    g2.addColorStop(0, 'rgba(56, 189, 248, 0.18)');
-    g2.addColorStop(0.5, 'rgba(79, 70, 229, 0.12)');
-    g2.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = g2;
-    ctx.fillRect(0, 0, width, height);
-
-    // 3. Các tia sáng cực quang xanh dương tỏa xoay tròn ngay đằng sau trái tim
-    const rayCount = 14;
-    const rayLen = Math.max(width, height) * (0.48 + beat * 0.05 + energyBoost * 0.12);
-    for (let i = 0; i < rayCount; i += 1) {
-      const ang = (Math.PI * 2 * i) / rayCount + t * 0.16;
-      const spread = 0.075 + 0.025 * Math.sin(t * 1.4 + i);
-      const alpha = (0.065 + 0.045 * Math.sin(t * 2.2 + i * 1.7)) * (1 + beat * 0.45 + energyBoost * 0.6);
-
-      const ex = cx + Math.cos(ang) * rayLen;
-      const ey = cy + Math.sin(ang) * rayLen;
-      const rGrad = ctx.createLinearGradient(cx, cy, ex, ey);
-      rGrad.addColorStop(0, `rgba(125, 228, 255, ${alpha})`);
-      rGrad.addColorStop(0.45, `rgba(37, 150, 255, ${alpha * 0.48})`);
-      rGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-      ctx.fillStyle = rGrad;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + Math.cos(ang - spread) * rayLen, cy + Math.sin(ang - spread) * rayLen);
-      ctx.lineTo(cx + Math.cos(ang + spread) * rayLen, cy + Math.sin(ang + spread) * rayLen);
-      ctx.closePath();
-      ctx.fill();
+    for (let i = 0; i < clouds.length; i += 1) {
+      const cl = clouds[i];
+      const g = ctx.createRadialGradient(cl.x, cl.y, 0, cl.x, cl.y, cl.r);
+      g.addColorStop(0, cl.c1);
+      g.addColorStop(0.55, cl.c2);
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, width, height);
     }
-
-    // 4. Đường hầm tam giác ánh sáng Xanh Neon 5D phóng chiều sâu từ sau trái tim (y hệt nền video hi.mp4!)
-    const TRI_COUNT = 8;
-    const maxRadius = Math.hypot(width, height) * 0.72;
-    for (let i = 0; i < TRI_COUNT; i += 1) {
-      // Tiến độ từ xa (0) phóng mượt lại gần (1) lặp vô hạn
-      const prog = ((t * 0.24 + i / TRI_COUNT) % 1);
-      const eased = Math.pow(prog, 2.2);
-      const rad = 28 + eased * maxRadius;
-      const rot = t * 0.18 + i * 0.36 + prog * 0.65;
-      const alpha = Math.sin(prog * Math.PI) * (0.48 + beat * 0.18);
-      if (alpha <= 0.01) continue;
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(rot);
-
-      ctx.beginPath();
-      for (let v = 0; v < 3; v += 1) {
-        const va = -Math.PI / 2 + (v * Math.PI * 2) / 3;
-        const vx = Math.cos(va) * rad;
-        const vy = Math.sin(va) * rad;
-        if (v === 0) ctx.moveTo(vx, vy);
-        else ctx.lineTo(vx, vy);
-      }
-      ctx.closePath();
-
-      // Lớp hào quang xanh neon rộng bên ngoài
-      ctx.strokeStyle = `rgba(30, 144, 255, ${alpha * 0.42})`;
-      ctx.lineWidth = 6 + eased * 10;
-      ctx.stroke();
-
-      // Lớp lõi tia laser xanh băng sắc nét bên trong
-      ctx.strokeStyle = `rgba(148, 236, 255, ${alpha * 0.92})`;
-      ctx.lineWidth = 1.4 + eased * 2.2;
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    // 5. Dải sóng plasma xanh năng lượng uốn lượn ngang sau lưng trái tim
-    for (let w = 0; w < 2; w += 1) {
-      ctx.beginPath();
-      const stepX = Math.max(16, Math.floor(width / 46));
-      for (let x = 0; x <= width + stepX; x += stepX) {
-        const nx = x / width;
-        const amp = (28 + w * 18) * (0.85 + beat * 0.35);
-        const y =
-          cy +
-          (w === 0 ? -18 : 26) +
-          Math.sin(nx * 6.2 + t * (1.3 - w * 0.35) + w * 2) * amp +
-          Math.cos(nx * 11.5 - t * 1.8) * (amp * 0.35);
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = w === 0 ? 'rgba(56, 214, 255, 0.24)' : 'rgba(99, 140, 255, 0.20)';
-      ctx.lineWidth = w === 0 ? 4 : 3;
-      ctx.stroke();
-    }
-
-    // 6. Quầng sáng xanh điện ngay sau tâm trái tim
-    const nebR = unitScale * (2.6 + beat * 0.38 + energyBoost * 1.15);
-    const neb = ctx.createRadialGradient(cx, cy, 0, cx, cy, nebR);
-    neb.addColorStop(0, `rgba(64, 210, 255, ${0.26 + beat * 0.12 + energyBoost * 0.2})`);
-    neb.addColorStop(0.45, 'rgba(37, 99, 235, 0.12)');
-    neb.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = neb;
-    ctx.fillRect(0, 0, width, height);
 
     ctx.restore();
   }
 
-  // Đĩa bệ phóng ánh sáng hologram 3D phát sáng rực rỡ ngay dưới trái tim (giống 00:05-00:20 trong video!)
-  function drawHologramPedestal(cosY, sinY, cosX, sinX, t, beat, pal, pillarGlow) {
-    const center = project3D(0, PEDESTAL_Y, 0, cosY, sinY, cosX, sinX);
-    if (!center) return;
+  function drawSoftBluePedestalPool(cosY, sinY, cosX, sinX, beat, visibility) {
+    if (visibility <= 0.01) return;
+    const p = project3D(0, PEDESTAL_Y, 0, cosY, sinY, cosX, sinX);
+    if (!p) return;
+
+    const flat = Math.max(0.2, Math.abs(sinX) * 0.92 + 0.14);
+    const rx = unitScale * (1.12 + beat * 0.06) * p.scale;
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
+    ctx.translate(p.sx, p.sy);
+    ctx.scale(1, flat);
 
-    // Luồng sáng mềm dạng sương hologram hắt từ đĩa bệ lên trái tim (không có cạnh cứng)
-    const midP = project3D(0, (PEDESTAL_Y - 0.35) * 0.5, 0, cosY, sinY, cosX, sinX);
-    if (midP) {
-      const beamRx = unitScale * 0.95 * center.scale;
-      const beamRy = unitScale * 1.15 * center.scale;
-      ctx.save();
-      ctx.translate(midP.sx, midP.sy);
-      ctx.scale(beamRx, beamRy);
-      const beamGrad = ctx.createRadialGradient(0, 0.25, 0, 0, 0.1, 1);
-      beamGrad.addColorStop(0, `rgba(${pal.discMid}, ${0.26 + pillarGlow * 0.22 + beat * 0.06})`);
-      beamGrad.addColorStop(0.55, `rgba(${pal.discOuter}, ${0.1 + pillarGlow * 0.1})`);
-      beamGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = beamGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, 1, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // Lõi đĩa ánh sáng plasma nằm ngang phát sáng rực
-    const flatRatio = Math.max(0.22, Math.abs(sinX) * 0.95 + 0.12);
-    const rx = unitScale * (1.22 + beat * 0.08) * center.scale;
-    const ry = rx * flatRatio;
-
-    ctx.save();
-    ctx.translate(center.sx, center.sy);
-    ctx.scale(1, flatRatio);
-    const discGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-    discGrad.addColorStop(0, `rgba(${pal.discInner}, ${0.78 + beat * 0.18})`);
-    discGrad.addColorStop(0.32, `rgba(${pal.discMid}, ${0.52 + beat * 0.12})`);
-    discGrad.addColorStop(0.68, `rgba(${pal.discOuter}, 0.2)`);
-    discGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = discGrad;
+    const outerG = ctx.createRadialGradient(0, 0, 0, 0, 0, rx * 1.48);
+    outerG.addColorStop(0, `rgba(120, 210, 255, ${0.44 * visibility})`);
+    outerG.addColorStop(0.38, `rgba(37, 128, 255, ${0.28 * visibility})`);
+    outerG.addColorStop(0.75, `rgba(29, 78, 216, ${0.09 * visibility})`);
+    outerG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = outerG;
     ctx.beginPath();
-    ctx.arc(0, 0, rx, 0, Math.PI * 2);
+    ctx.arc(0, 0, rx * 1.48, 0, Math.PI * 2);
     ctx.fill();
-    ctx.restore();
 
-    // 3 vòng sáng đồng tâm 3D thực trên bề mặt đĩa bệ
-    const ringRadii = [0.46, 0.82, 1.14];
-    for (let rIdx = 0; rIdx < ringRadii.length; rIdx += 1) {
-      const rad = ringRadii[rIdx] * (1 + 0.03 * Math.sin(t * 2.5 - rIdx));
-      ctx.beginPath();
-      const STEPS = 64;
-      let started = false;
-      for (let i = 0; i <= STEPS; i += 1) {
-        const ang = (Math.PI * 2 * i) / STEPS;
-        const p = project3D(Math.cos(ang) * rad, PEDESTAL_Y, Math.sin(ang) * rad, cosY, sinY, cosX, sinX);
-        if (!p) continue;
-        if (!started) {
-          ctx.moveTo(p.sx, p.sy);
-          started = true;
-        } else {
-          ctx.lineTo(p.sx, p.sy);
-        }
-      }
-      ctx.strokeStyle =
-        rIdx === 0
-          ? `rgba(${pal.discInner}, ${0.75 + beat * 0.2})`
-          : `rgba(${pal.discMid}, ${0.5 - rIdx * 0.12})`;
-      ctx.lineWidth = rIdx === 0 ? 2.4 : 1.7;
-      ctx.stroke();
-    }
+    const innerG = ctx.createRadialGradient(0, 0, 0, 0, 0, rx * 0.74);
+    innerG.addColorStop(0, `rgba(235, 249, 255, ${(0.9 + beat * 0.1) * visibility})`);
+    innerG.addColorStop(0.45, `rgba(96, 195, 255, ${0.6 * visibility})`);
+    innerG.addColorStop(1, 'rgba(37, 99, 235, 0)');
+    ctx.fillStyle = innerG;
+    ctx.beginPath();
+    ctx.arc(0, 0, rx * 0.74, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }
 
-  function drawGalaxyRibbonLines(cosY, sinY, cosX, sinX, pal, ringIntro) {
+  function stepAndDrawBlueSilkAura(dt, t, auraIntensity, cosY, sinY, cosX, sinX) {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    for (let rIdx = 0; rIdx < galaxyRings.length; rIdx += 1) {
-      const ring = galaxyRings[rIdx];
-      const cxT = Math.cos(ring.tiltX);
-      const sxT = Math.sin(ring.tiltX);
-      const czT = Math.cos(ring.tiltZ);
-      const szT = Math.sin(ring.tiltZ);
-      const rad = ring.radius * (0.45 + 0.55 * ringIntro);
 
-      ctx.beginPath();
-      const STEPS = 80;
-      let started = false;
-      for (let i = 0; i <= STEPS; i += 1) {
-        const ang = (Math.PI * 2 * i) / STEPS;
-        const x0 = Math.cos(ang) * rad;
-        const z0 = Math.sin(ang) * rad;
-        const y1 = -z0 * sxT;
-        const z1 = z0 * cxT;
-        const x2 = x0 * czT - y1 * szT;
-        const y2 = x0 * szT + y1 * czT;
-        const p = project3D(x2, y2, z1, cosY, sinY, cosX, sinX);
-        if (!p) continue;
-        if (!started) {
-          ctx.moveTo(p.sx, p.sy);
-          started = true;
-        } else {
-          ctx.lineTo(p.sx, p.sy);
-        }
+    for (let i = 0; i < blueFlames.length; i += 1) {
+      const p = blueFlames[i];
+      p.life += dt * p.speed;
+      if (p.life >= p.maxLife || p.y < -1.55) {
+        resetFluidParticle(p, false);
       }
-      ctx.strokeStyle = `${rIdx === 0 ? pal.ring1 : pal.ring2}${0.22 * ringIntro})`;
-      ctx.lineWidth = rIdx === 0 ? 2.0 : 1.5;
-      ctx.stroke();
+
+      const prog = p.life / p.maxLife;
+      const heartEnv = Math.sin(prog * Math.PI);
+      const targetAngle = prog * 4.4 + p.stream * 1.25 + t * 0.9;
+      const targetRadius = 0.24 + heartEnv * (0.62 + auraIntensity * 0.48);
+      const tx = Math.cos(targetAngle) * targetRadius + p.side * heartEnv * auraIntensity * 0.24;
+      const tz = Math.sin(targetAngle) * targetRadius * 0.65 - 0.16;
+
+      p.x += (tx - p.x) * Math.min(1, dt * 2.8) + Math.sin(p.y * 3.2 + t * 2.0 + p.seed) * dt * 0.28;
+      p.z += (tz - p.z) * Math.min(1, dt * 2.8) + Math.cos(p.y * 3.0 - t * 1.8 + p.seed) * dt * 0.25;
+      p.y -= (0.72 + auraIntensity * 0.36) * dt;
+
+      if (auraIntensity < 0.08 && !p.isSpark) continue;
+
+      const proj = project3D(p.x, p.y, p.z, cosY, sinY, cosX, sinX);
+      if (!proj) continue;
+
+      const fade = Math.sin(prog * Math.PI);
+      if (p.isSpark) {
+        const s = Math.max(1.6, (1.8 + auraIntensity * 2.4) * proj.scale);
+        ctx.globalAlpha = fade * (0.22 + auraIntensity * 0.7);
+        ctx.drawImage(STAR_SPRITES[p.spriteIdx % STAR_SPRITES.length], proj.sx - s, proj.sy - s, s * 2, s * 2);
+      } else {
+        const s = Math.max(4.5, p.size * proj.scale * (0.7 + auraIntensity * 0.68));
+        ctx.globalAlpha = fade * (0.08 + auraIntensity * 0.32);
+        ctx.drawImage(BLUE_SMOKE_SPRITES[p.spriteIdx], proj.sx - s, proj.sy - s, s * 2, s * 2);
+      }
     }
+
     ctx.restore();
   }
 
   // ============================================================
-  // 7. VÒNG LẶP KẾT XUẤT 5D 60FPS (ĐẦY ĐỦ CHU KỲ BIẾN HÌNH VIDEO!)
+  // 6. VÒNG LẶP KẾT XUẤT 60FPS — HIỆU ỨNG TRÀN KÍN 100% MÀN HÌNH
   // ============================================================
   function render(now) {
     const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
     lastTime = now;
     elapsed += dt;
     const t = elapsed;
-    const pal = getHeartPalette(t);
-    const bluePal = getBackBluePalette();
 
-    manualSwirlBoost = Math.max(0, manualSwirlBoost - dt * 0.42);
+    manualAuraBoost = Math.max(0, manualAuraBoost - dt * 0.35);
 
-    // Chu kỳ hoạt ảnh 20 giây y hệt video hi.mp4:
-    // 0.0 - 0.5s  : Hạt phủ kín đĩa bệ sáng phía dưới (00:02)
-    // 0.5 - 2.9s  : Cột ánh sáng xoáy bay vọt từ bệ lên kết tinh thành Trái Tim 3D (00:03-00:05)
-    // 2.9 - 9.0s  : Trái Tim 3D pha lê đập nhịp tỏa sáng trên đĩa bệ (00:05-00:09)
-    // 9.0 - 15.2s : Dòng xoáy cực quang uốn lượn + pháo hoa bồ công anh bùng nở (00:09-00:16)
-    // 15.2 - 18.2s: Tái hội tụ mượt về Trái Tim 3D nguyên vẹn (00:16-00:20)
-    // 18.2 - 20.0s: Đổ thác hạt lấp lánh nhẹ xuống đĩa bệ để lặp chu kỳ mới!
-    const cycleT = t % 20.0;
-    const isInitialRise = cycleT < 3.2;
-    const riseProgress = smoothstep(0.35, 2.75, cycleT);
-    const collapseAmount = smoothstep(18.2, 19.65, cycleT) * (1 - smoothstep(19.85, 20.0, cycleT));
+    const cycleT = t % 21.0;
+    const isRising = cycleT < 4.2;
+    const riseP = smoothstep(0.7, 3.9, cycleT);
+    const fallP = smoothstep(19.2, 20.7, cycleT) * (1 - smoothstep(20.9, 21.0, cycleT));
 
-    // Cường độ dòng xoáy cực quang & pháo hoa bồ công anh (00:09 -> 00:16 trong video!)
-    const autoSwirl = smoothstep(9.0, 11.0, cycleT) * (1 - smoothstep(13.8, 16.4, cycleT));
-    const autoBloom = smoothstep(11.6, 13.4, cycleT) * (1 - smoothstep(14.8, 16.8, cycleT));
-    const swirlAmt = Math.max(autoSwirl, manualSwirlBoost);
-    const bloomAmt = Math.max(autoBloom, manualSwirlBoost * 0.85);
-    const pillarGlow = (isInitialRise ? 1 - Math.abs(riseProgress - 0.5) * 1.8 : 0) + collapseAmount * 0.8;
+    const autoFlameAura = 0.26 + 0.74 * smoothstep(8.2, 10.2, cycleT) * (1 - smoothstep(13.8, 16.0, cycleT));
+    const autoDandelion = smoothstep(12.0, 13.6, cycleT) * (1 - smoothstep(14.8, 16.6, cycleT));
+    const flameIntensity = Math.max(autoFlameAura, manualAuraBoost);
+    const dandelionAmt = Math.max(autoDandelion, manualAuraBoost * 0.72);
+    const pedestalVis = smoothstep(2.6, 4.3, cycleT) * (1 - smoothstep(19.3, 20.5, cycleT));
 
-    // Nhịp đập trái tim chân thực
-    const beatCycle = (t * 1.16) % 1;
-    const beat1 = Math.exp(-Math.pow((beatCycle - 0.12) / 0.072, 2));
-    const beat2 = 0.68 * Math.exp(-Math.pow((beatCycle - 0.3) / 0.088, 2));
-    const beat = beat1 + beat2;
-    const heartPulse = 1 + beat * 0.09 + manualSwirlBoost * 0.12;
-
-    if (beat1 > 0.92 && t - lastBeatPulse > 0.72) {
-      lastBeatPulse = t;
-      shockwaves.push({
-        x: width * 0.5,
-        y: height * 0.48,
-        r: unitScale * 0.6,
-        maxR: unitScale * 2.45,
-        life: 0,
-        maxLife: 1.2,
-        color: pal.coreRgb,
-      });
-    }
+    const beatCycle = (t * 1.1) % 1;
+    const beat =
+      Math.exp(-Math.pow((beatCycle - 0.14) / 0.08, 2)) +
+      0.55 * Math.exp(-Math.pow((beatCycle - 0.32) / 0.095, 2));
+    const heartScale = 1 + beat * 0.055;
 
     if (elapsed > nextMeteorTime) {
       spawnMeteor();
-      nextMeteorTime = elapsed + rand(2.4, 5.0);
+      nextMeteorTime = elapsed + rand(1.4, 3.2);
     }
 
-    // Xoay camera 360° + quán tính + thị sai 5D
+    // Tự động bắn pháo hoa liên tục khắp màn hình (trái, phải, trên, góc)
+    if (elapsed > nextFireworkTime && fireworkSparks.length < 520) {
+      if (Math.random() < 0.45) {
+        detonateFirework(rand(width * 0.1, width * 0.9), rand(height * 0.14, height * 0.55));
+      } else {
+        launchFireworkRocket();
+      }
+      nextFireworkTime = elapsed + rand(0.75, 1.45);
+    }
+
     if (!isDragging) {
       camRotY += cfg.autoRotateSpeed * dt + velY;
-      camRotX = Math.max(-0.85, Math.min(0.85, camRotX + velX));
+      camRotX = Math.max(-0.82, Math.min(0.82, camRotX + velX));
       velY *= Math.pow(0.92, dt * 60);
       velX *= Math.pow(0.92, dt * 60);
     }
@@ -1359,24 +1266,10 @@
     const cosX = Math.cos(viewX);
     const sinX = Math.sin(viewX);
 
-    // 1. Nền hiệu ứng Xanh Neon 5D phía sau trái tim (tam giác neon phóng chiều sâu + tia sáng + sóng xanh)
-    drawBlueBackdropBehindHeart(t, beat, swirlAmt, -parallaxX * 140, -parallaxY * 140);
+    // 1. Tinh vân xanh sâu phủ kín cả 4 góc màn hình
+    drawFullScreenCosmicBlueNebula(t, beat, flameIntensity);
 
-    // 2. Sao nền lấp lánh
-    for (let i = 0; i < stars.length; i += 1) {
-      const s = stars[i];
-      const sx = (s.nx * width - parallaxX * 160 * s.depth + width) % width;
-      const sy = (s.ny * height - parallaxY * 160 * s.depth + height) % height;
-      const alpha = 0.22 + 0.72 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
-      ctx.fillStyle = s.color;
-      ctx.globalAlpha = alpha;
-      ctx.beginPath();
-      ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    // 3. Sao băng lướt ngang
+    // 2. Sao băng xanh xẹt ngang bầu trời
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     for (let i = meteors.length - 1; i >= 0; i -= 1) {
@@ -1396,198 +1289,132 @@
 
       const grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
       grad.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
-      grad.addColorStop(0.35, `rgba(${pal.coreRgb}, ${alpha * 0.65})`);
+      grad.addColorStop(0.38, `rgba(96, 195, 255, ${alpha * 0.7})`);
       grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.strokeStyle = grad;
-      ctx.lineWidth = 2.4;
+      ctx.lineWidth = 2.2;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(m.x, m.y);
       ctx.lineTo(tx, ty);
       ctx.stroke();
-
-      drawStarGlint(ctx, m.x, m.y, 7, '#ffffff', alpha, t * 4);
     }
     ctx.restore();
 
-    // 4. Vẽ Đĩa Bệ Hologram Xanh 3D phát sáng + Dải sáng vòng thiên hà xanh
-    drawHologramPedestal(cosY, sinY, cosX, sinX, t, beat, bluePal, Math.max(0, pillarGlow));
-    const ringIntro = Math.min(1, elapsed / 1.1);
-    drawGalaxyRibbonLines(cosY, sinY, cosX, sinX, bluePal, ringIntro);
+    // 3. Đĩa quầng sáng xanh & Làn khói lửa xanh mềm mại sau trái tim
+    drawSoftBluePedestalPool(cosY, sinY, cosX, sinX, beat, pedestalVis);
+    stepAndDrawBlueSilkAura(dt, t, flameIntensity, cosY, sinY, cosX, sinX);
 
-    // 5. Xây hàng đợi Z-sort 3D thống nhất
+    // 4. Hàng đợi Z-sort 3D toàn màn hình
     renderQueue.length = 0;
 
-    // 5a. Lõi phát sáng trung tâm trái tim
-    const coreProj = project3D(0, -0.30, 0, cosY, sinY, cosX, sinX);
-    if (coreProj) {
-      renderQueue.push({ type: 'core', z: coreProj.z, proj: coreProj });
-    }
+    // 4a. DẢI NGÂN HÀ XANH & ĐOM ĐÓM SAO 3D TRẢI KÍN 100% MÀN HÌNH (trái, phải, trên, dưới!)
+    for (let i = 0; i < galaxyField.length; i += 1) {
+      const gf = galaxyField[i];
+      gf.u += gf.speed * dt;
+      if (gf.u > 1.15) gf.u = -1.15;
+      else if (gf.u < -1.15) gf.u = 1.15;
 
-    // 5b. Hạt xoáy trên đĩa bệ & cột bụi ánh sáng dâng lên thân tim
-    for (let i = 0; i < pedestalParticles.length; i += 1) {
-      const pp = pedestalParticles[i];
-      pp.angle += pp.speed * dt;
-      let px = Math.cos(pp.angle) * pp.radius;
-      let pz = Math.sin(pp.angle) * pp.radius;
-      let py = PEDESTAL_Y + Math.sin(t * 2 + pp.phase) * 0.03;
-      let pAlpha = 0.85;
+      let wx = gf.u * worldSpanX;
+      let wy = gf.v * worldSpanY;
+      const wz = gf.z;
 
-      if (pp.rise) {
-        pp.riseProg = (pp.riseProg + pp.riseSpeed * dt) % 1;
-        const rr = pp.radius * (0.25 + 0.55 * (1 - pp.riseProg));
-        const swirl = pp.angle + pp.riseProg * 3.2;
-        px = Math.cos(swirl) * rr;
-        pz = Math.sin(swirl) * rr;
-        py = PEDESTAL_Y - pp.riseProg * 2.15;
-        pAlpha = Math.sin(pp.riseProg * Math.PI) * 0.85;
-      }
-
-      const proj = project3D(px, py, pz, cosY, sinY, cosX, sinX);
-      if (!proj) continue;
-      renderQueue.push({
-        type: 'pedestalDot',
-        z: proj.z,
-        proj,
-        sprite: bluePal.sprites[pp.spriteIdx],
-        size: pp.size,
-        alpha: pAlpha,
-      });
-    }
-
-    // 5c. 2.400 hạt Trái Tim 3D (Đổ thác <-> Cột sáng bốc lên <-> Trái tim pha lê <-> Xoáy lửa & pháo hoa bồ công anh!)
-    const heartSpin = Math.sin(t * 0.55) * 0.18;
-    const hCos = Math.cos(heartSpin);
-    const hSin = Math.sin(heartSpin);
-
-    for (let i = 0; i < heartParticles.length; i += 1) {
-      const p = heartParticles[i];
-
-      // Vị trí chuẩn của trái tim pha lê 3D
-      const sc = heartPulse * (p.isAura ? 1 + 0.04 * Math.sin(t * 2.2 + p.twinklePhase) : 1);
-      let wx = (p.bx * hCos - p.bz * hSin) * sc;
-      let wz = (p.bx * hSin + p.bz * hCos) * sc;
-      let wy = p.by * sc;
-
-      // Pha mở màn: Từ đĩa bệ dưới đáy -> bốc lên qua cột ánh sáng xoáy -> tạo hình trái tim!
-      if (isInitialRise) {
-        const pProg = clamp01((riseProgress - p.riseDelay * 0.55) / (1 - p.riseDelay * 0.55));
-        const ease = pProg * pProg * (3 - 2 * pProg);
-        const midArc = Math.sin(ease * Math.PI); // Đỉnh ở giữa khi đang bay lên qua cột sáng
-        const swirlAng = p.pillarAng + (1 - ease) * 4.5 + t * 1.4;
-        const colX = Math.cos(swirlAng) * p.pillarRad;
-        const colZ = Math.sin(swirlAng) * p.pillarRad;
-
-        wx = p.dx0 * (1 - ease) + wx * ease + (colX - wx) * midArc * 0.55;
-        wz = p.dz0 * (1 - ease) + wz * ease + (colZ - wz) * midArc * 0.55;
-        wy = PEDESTAL_Y * (1 - ease) + wy * ease;
-      }
-
-      // Pha cuối chu kỳ: Đổ thác hạt ánh sáng nhẹ xuống đĩa bệ phía dưới (00:01-00:02 trong video)
-      if (collapseAmount > 0.001) {
-        const drop = clamp01((collapseAmount - p.riseDelay * 0.35) / (1 - p.riseDelay * 0.35));
-        const dEase = drop * drop;
-        wx = wx * (1 - dEase) + p.dx0 * dEase;
-        wz = wz * (1 - dEase) + p.dz0 * dEase;
-        wy = wy * (1 - dEase) + PEDESTAL_Y * dEase;
-      }
-
-      // Pha cao trào (00:09-00:16 trong video): Dòng xoáy cực quang uốn lượn & Pháo hoa bồ công anh!
-      if (swirlAmt > 0.005 || bloomAmt > 0.005) {
-        // Sóng xoáy chất lỏng kiểu cánh lửa / cực quang cuốn quanh trái tim
-        const curlAngle = (wy + 1.2) * 2.6 + t * p.streamSpeed + p.streamPhase * 0.35;
-        const swirlR = swirlAmt * (0.28 + 0.34 * Math.sin(t * 2.1 + p.streamPhase));
-        const wingX = Math.sin(curlAngle) * swirlR * (p.streamBranch === 0 ? 1.35 : 0.95);
-        const wingZ = Math.cos(curlAngle) * swirlR * 1.1;
-        const wingY = Math.sin(curlAngle * 1.4 + p.streamBranch) * swirlAmt * 0.24;
-
-        // Kéo một phần hạt thành 4 chùm pháo hoa bồ công anh nở bung phía trên tim!
-        const bFactor = bloomAmt * (p.streamBranch === 2 ? 0.95 : 0.55);
-        wx = wx * (1 - bFactor) + p.fx * bFactor + wingX;
-        wy = wy * (1 - bFactor) + p.fy * bFactor + wingY;
-        wz = wz * (1 - bFactor) + p.fz * bFactor + wingZ;
+      if (gf.isRiver) {
+        // Tạo thành 3 dải ngân hà sao xanh uốn lượn mềm mại vắt ngang từ mép trái sang mép phải màn hình
+        const riverCurve =
+          Math.sin(gf.u * 2.8 + t * 0.45 + gf.band * 2.1) * 0.95 +
+          (gf.band - 1) * (worldSpanY * 0.42);
+        wy = riverCurve + gf.v * 0.68;
+      } else {
+        wy += Math.sin(t * gf.swaySpeed + gf.swayPhase) * 0.18;
       }
 
       const proj = project3D(wx, wy, wz, cosY, sinY, cosX, sinX);
-      if (!proj) {
-        p.prevSx = null;
-        p.prevSy = null;
-        continue;
-      }
-
-      const drawStreak = swirlAmt > 0.14 || (isInitialRise && riseProgress > 0.05 && riseProgress < 0.95) || collapseAmount > 0.08;
-      renderQueue.push({
-        type: 'heartBloom',
-        z: proj.z,
-        proj,
-        p,
-        sprite: pal.sprites[p.spriteIdx],
-        drawStreak,
-        prevSx: p.prevSx,
-        prevSy: p.prevSy,
-      });
-
-      p.prevSx = proj.sx;
-      p.prevSy = proj.sy;
-    }
-
-    // 5d. Hạt sáng chạy dọc 2 vòng thiên hà 3D
-    for (let rIdx = 0; rIdx < galaxyRings.length; rIdx += 1) {
-      const ring = galaxyRings[rIdx];
-      const cxT = Math.cos(ring.tiltX);
-      const sxT = Math.sin(ring.tiltX);
-      const czT = Math.cos(ring.tiltZ);
-      const szT = Math.sin(ring.tiltZ);
-      const ringSprite = bluePal.sprites[rIdx === 0 ? 0 : 2];
-
-      for (let i = 0; i < ring.particles.length; i += 1) {
-        const rp = ring.particles[i];
-        const ang = rp.angle + t * ring.speed;
-        const rad = (ring.radius + rp.radOffset) * (0.45 + 0.55 * ringIntro);
-        const x0 = Math.cos(ang) * rad;
-        const z0 = Math.sin(ang) * rad;
-        const y0 = rp.yOffset;
-
-        const y1 = y0 * cxT - z0 * sxT;
-        const z1 = y0 * sxT + z0 * cxT;
-        const x2 = x0 * czT - y1 * szT;
-        const y2 = x0 * szT + y1 * czT;
-
-        const proj = project3D(x2, y2, z1, cosY, sinY, cosX, sinX);
-        if (!proj) continue;
-        renderQueue.push({ type: 'ringBloom', z: proj.z, proj, rp, glow: ringSprite });
-      }
-    }
-
-    // 5e. Trái tim mini 3D bay lơ lửng
-    for (let i = 0; i < miniHearts.length; i += 1) {
-      const mh = miniHearts[i];
-      mh.y += mh.vy * dt;
-      mh.rot += mh.rotSpeed * dt;
-      if (mh.y < -3.8) {
-        mh.y = 3.8;
-        mh.x = rand(-3.5, 3.5);
-      }
-      const wx = mh.x + Math.sin(t * 0.9 + mh.swayPhase) * mh.swayAmp;
-      const proj = project3D(wx, mh.y, mh.z, cosY, sinY, cosX, sinX);
       if (!proj) continue;
-      renderQueue.push({ type: 'miniHeart', z: proj.z, proj, mh, color: pal.heartColors[mh.colorIdx % pal.heartColors.length] });
+      renderQueue.push({ type: 'galaxyStar', z: proj.z, proj, gf });
     }
 
-    // 5f. 11 ảnh xoay quanh trái tim kèm vệt bụi sao
-    const orbitSpeed = 0.42;
-    const orbitTilt = 0.24;
+    // 4b. 68 Trái tim xanh phát sáng bay lơ lửng khắp mọi góc màn hình
+    for (let i = 0; i < floatingHearts.length; i += 1) {
+      const fh = floatingHearts[i];
+      fh.v -= fh.vy * dt;
+      fh.rot += fh.rotSpeed * dt;
+      if (fh.v < -1.18) {
+        fh.v = 1.18;
+        fh.u = rand(-1.05, 1.05);
+      }
+      const wx = (fh.u + Math.sin(t * 0.9 + fh.swayPhase) * fh.swayAmp) * worldSpanX;
+      const wy = fh.v * worldSpanY;
+      const proj = project3D(wx, wy, fh.z, cosY, sinY, cosX, sinX);
+      if (!proj) continue;
+      renderQueue.push({ type: 'floatingHeart', z: proj.z, proj, fh });
+    }
+
+    // 4c. 3.800 hạt sao mịn tạo Trái Tim 3D lớn ở trung tâm
+    const heartSpin = t * 0.35;
+    const hCos = Math.cos(heartSpin);
+    const hSin = Math.sin(heartSpin);
+
+    for (let i = 0; i < heartDust.length; i += 1) {
+      const p = heartDust[i];
+      let wx = (p.bx * hCos - p.bz * hSin) * heartScale;
+      let wz = (p.bx * hSin + p.bz * hCos) * heartScale;
+      let wy = p.by * heartScale;
+
+      if (isRising) {
+        const prog = clamp01((riseP - p.delay * 0.55) / (1 - p.delay * 0.55));
+        const ease = prog * prog * (3 - 2 * prog);
+        const mid = Math.sin(ease * Math.PI);
+        const colX = Math.cos(p.colAng + t * 1.2) * p.colRad;
+        const colZ = Math.sin(p.colAng + t * 1.2) * p.colRad;
+
+        wx = p.fx0 * (1 - ease) + wx * ease + (colX - wx) * mid * 0.72;
+        wz = p.fz0 * (1 - ease) + wz * ease + (colZ - wz) * mid * 0.72;
+        wy = PEDESTAL_Y * (1 - ease) + wy * ease;
+      }
+
+      if (fallP > 0.001) {
+        const dProg = clamp01((fallP - p.delay * 0.35) / (1 - p.delay * 0.35));
+        const dEase = dProg * dProg;
+        wx = wx * (1 - dEase) + p.fx0 * dEase;
+        wz = wz * (1 - dEase) + p.fz0 * dEase;
+        wy = wy * (1 - dEase) + PEDESTAL_Y * dEase;
+      }
+
+      if (dandelionAmt > 0.005 && p.isDandelion) {
+        const b = dandelionAmt * 0.88;
+        const tx = p.dx * hCos - p.dz * hSin;
+        const tz = p.dx * hSin + p.dz * hCos;
+        wx = wx * (1 - b) + tx * b;
+        wy = wy * (1 - b) + p.dy * b;
+        wz = wz * (1 - b) + tz * b;
+      } else if (flameIntensity > 0.3) {
+        const wave = Math.sin(wy * 3.2 + t * 3.2 + p.twPhase) * (flameIntensity - 0.25) * 0.09;
+        wx += wave;
+        wz += Math.cos(wx * 3.2 - t * 2.8 + p.twPhase) * (flameIntensity - 0.25) * 0.09;
+      }
+
+      const proj = project3D(wx, wy, wz, cosY, sinY, cosX, sinX);
+      if (!proj) continue;
+      renderQueue.push({ type: 'dust', z: proj.z, proj, p });
+    }
+
+    // 4d. 11 tấm ảnh xoay 3D rộng thoáng quanh trái tim (tự mở rộng quỹ đạo theo màn hình ngang!)
+    const orbitSpeed = 0.4;
+    const orbitTilt = 0.22;
     const oCos = Math.cos(orbitTilt);
     const oSin = Math.sin(orbitTilt);
-    const photoBloom = smoothstep(0.25, 1.4, elapsed);
+    const photoEnter = smoothstep(0.25, 1.35, elapsed);
+    const wideOrbitX = Math.max(2.45, Math.min(3.55, worldSpanX * 0.62));
+    const wideOrbitZ = 2.42;
 
     for (let i = 0; i < orbitPhotos.length; i += 1) {
       const item = orbitPhotos[i];
       const ang = item.baseAngle + t * orbitSpeed;
-      const rad = item.radiusMul * (0.38 + 0.62 * photoBloom);
-      const ox = Math.cos(ang) * rad;
-      const oz = Math.sin(ang) * rad;
-      const oy = (item.yOffset || 0) + Math.sin(t * 1.4 + item.yBobPhase) * item.yBobAmp;
+      const enterScale = 0.45 + 0.55 * photoEnter;
+      const ox = Math.cos(ang) * (wideOrbitX + item.radiusOffset) * enterScale;
+      const oz = Math.sin(ang) * (wideOrbitZ + item.radiusOffset) * enterScale;
+      const oy = item.yOffset + Math.sin(t * 1.3 + item.yBobPhase) * item.yBobAmp;
 
       const wy = oy * oCos - oz * oSin;
       const wz = oy * oSin + oz * oCos;
@@ -1595,79 +1422,38 @@
       const proj = project3D(ox, wy, wz, cosY, sinY, cosX, sinX);
       if (!proj) continue;
 
-      item.trailTimer += dt;
-      if (item.trailTimer > 0.26 && bursts.length < 210 && photoBloom > 0.8) {
-        item.trailTimer = 0;
-        bursts.push({
-          kind: 'star',
-          x: proj.sx + rand(-14, 14),
-          y: proj.sy + rand(-14, 14),
-          vx: rand(-14, 14),
-          vy: rand(-14, 14),
-          gravity: 4,
-          drag: 0.96,
-          size: rand(3.5, 7),
-          rot: rand(0, Math.PI),
-          rotSpeed: rand(-2, 2),
-          color: pick(pal.heartColors),
-          life: 0,
-          maxLife: rand(0.45, 0.85),
-        });
-      }
-
       renderQueue.push({
         type: 'orbitPhoto',
         z: proj.z,
         proj,
         photo: loadedPhotos[item.photoIndex],
-        tilt: Math.sin(t * 1.2 + item.tiltPhase) * 0.085,
+        tilt: Math.sin(t * 1.1 + item.tiltPhase) * 0.075,
         yawCos: 0.78 + 0.22 * Math.cos(ang + viewY),
-        alphaMul: photoBloom,
+        alphaMul: photoEnter,
       });
     }
 
-    // 5g. 16 ảnh rơi 5D từ trên xuống dưới
+    // 4e. 22 tấm ảnh rơi 5D trải rộng khắp chiều ngang toàn màn hình
     for (let i = 0; i < fallingPhotos.length; i += 1) {
       const f = fallingPhotos[i];
       f.y += f.vy * dt;
       f.spinPhase += f.spinSpeed * dt;
-      f.trailTimer += dt;
-
-      if (f.y > 4.0) {
-        fallingPhotos[i] = createFallingPhoto(false);
+      if (f.y > worldSpanY + 0.6) {
+        fallingPhotos[i] = createFallingPhoto(false, i, fallingPhotos.length);
         continue;
       }
 
-      const wx = f.x + Math.sin(t * f.swayFreq + f.swayPhase) * f.swayAmp;
-      const worldProj = project3D(wx, f.y, f.z, cosY, sinY, cosX, sinX);
-      if (!worldProj) continue;
-
-      if (f.trailTimer > 0.28 && bursts.length < 210) {
-        f.trailTimer = 0;
-        bursts.push({
-          kind: Math.random() < 0.55 ? 'star' : 'heart',
-          x: worldProj.sx + rand(-14, 14),
-          y: worldProj.sy - 14,
-          vx: rand(-12, 12),
-          vy: rand(-26, -6),
-          gravity: 10,
-          drag: 0.98,
-          size: rand(4, 8.5),
-          rot: rand(-0.4, 0.4),
-          rotSpeed: rand(-1.5, 1.5),
-          color: pick(pal.heartColors),
-          life: 0,
-          maxLife: rand(0.6, 1.0),
-        });
-      }
+      const wx = f.u * worldSpanX + Math.sin(t * f.swayFreq + f.swayPhase) * f.swayAmp;
+      const proj = project3D(wx, f.y, f.z, cosY, sinY, cosX, sinX);
+      if (!proj) continue;
 
       renderQueue.push({
         type: 'fallingPhoto',
-        z: worldProj.z,
-        proj: worldProj,
+        z: proj.z,
+        proj,
         photo: loadedPhotos[f.photoIndex],
         rot: Math.sin(f.spinPhase) * f.rotAmp,
-        flutterX: 0.68 + 0.32 * Math.abs(Math.cos(f.spinPhase * 0.85)),
+        flutterX: 0.7 + 0.3 * Math.abs(Math.cos(f.spinPhase * 0.85)),
         scaleMul: f.scaleMul,
         yWorld: f.y,
       });
@@ -1676,78 +1462,70 @@
     // Sắp xếp xa -> gần cho chiều sâu 3D/5D thật
     renderQueue.sort((a, b) => b.z - a.z);
     clickableCards = [];
-    let additiveOn = false;
+    let additive = false;
 
     for (let i = 0; i < renderQueue.length; i += 1) {
       const node = renderQueue[i];
       const { sx, sy, scale, z } = node.proj;
-      const needsAdditive =
-        node.type === 'core' ||
-        node.type === 'heartBloom' ||
-        node.type === 'ringBloom' ||
-        node.type === 'pedestalDot';
+      const wantAdd =
+        node.type === 'dust' || node.type === 'galaxyStar' || node.type === 'floatingHeart';
 
-      if (needsAdditive !== additiveOn) {
-        additiveOn = needsAdditive;
-        ctx.globalCompositeOperation = additiveOn ? 'lighter' : 'source-over';
+      if (wantAdd !== additive) {
+        additive = wantAdd;
+        ctx.globalCompositeOperation = additive ? 'lighter' : 'source-over';
         ctx.globalAlpha = 1;
       }
 
-      if (node.type === 'core') {
-        const coreR = unitScale * (1.22 + swirlAmt * 0.45) * scale * heartPulse;
-        const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, coreR);
-        g.addColorStop(0, `rgba(${pal.coreInner}, ${0.38 + beat * 0.18 + swirlAmt * 0.2})`);
-        g.addColorStop(0.35, `rgba(${pal.coreRgb}, ${0.24 + beat * 0.12})`);
-        g.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(sx, sy, coreR, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (node.type === 'pedestalDot') {
-        const s = Math.max(2.2, node.size * scale * 0.72);
-        ctx.globalAlpha = node.alpha * Math.max(0.2, Math.min(1, 1.45 - z * 0.11));
-        ctx.drawImage(node.sprite, sx - s, sy - s, s * 2, s * 2);
-      } else if (node.type === 'heartBloom') {
+      if (node.type === 'dust') {
         const p = node.p;
-        const depthAlpha = Math.max(0.24, Math.min(1, 1.5 - z * 0.115));
-        const tw = 0.6 + 0.4 * Math.sin(t * p.twinkleSpeed + p.twinklePhase);
-        const s = Math.max(2.6, p.size * scale * 0.8 * (p.isRim ? 1.06 : 0.92));
+        const depthAlpha = Math.max(0.24, Math.min(1, 1.5 - z * 0.12));
+        const tw = 0.55 + 0.45 * Math.sin(t * p.twSpeed + p.twPhase);
+        const alpha = depthAlpha * tw;
 
-        // Vệt tia sáng chất lỏng cực ảo trong lúc bay cột sáng / xoáy cực quang / pháo hoa!
-        if (node.drawStreak && node.prevSx !== null) {
-          const dist = Math.hypot(sx - node.prevSx, sy - node.prevSy);
-          if (dist > 1.2 && dist < 55) {
-            ctx.globalAlpha = depthAlpha * 0.48;
-            ctx.strokeStyle = `rgb(${pal.streakRgb})`;
-            ctx.lineWidth = Math.max(1, s * 0.36);
-            ctx.beginPath();
-            ctx.moveTo(node.prevSx, node.prevSy);
-            ctx.lineTo(sx, sy);
-            ctx.stroke();
-          }
+        if (p.glowy) {
+          const s = Math.max(2.0, p.size * scale * 1.65);
+          ctx.globalAlpha = alpha * 0.9;
+          ctx.drawImage(STAR_SPRITES[p.spriteIdx], sx - s, sy - s, s * 2, s * 2);
+        } else {
+          const r = Math.max(0.75, p.size * scale * 0.62);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(sx, sy, r, 0, Math.PI * 2);
+          ctx.fill();
         }
+      } else if (node.type === 'galaxyStar') {
+        const gf = node.gf;
+        const depthAlpha = Math.max(0.18, Math.min(0.95, 1.45 - z * 0.11));
+        const tw = 0.45 + 0.55 * Math.sin(t * gf.swaySpeed + gf.swayPhase);
+        const alpha = depthAlpha * tw * (gf.isRiver ? 0.92 : 0.78);
 
-        ctx.globalAlpha = depthAlpha * tw * (p.isAura ? 0.58 : 0.92);
-        ctx.drawImage(node.sprite, sx - s, sy - s, s * 2, s * 2);
-        if (p.sparkle && s > 3.8) {
-          drawStarGlint(ctx, sx, sy, s * 1.08, '#ffffff', depthAlpha * tw * 0.9, t * 1.6 + p.twinklePhase);
+        if (gf.glowy) {
+          const s = Math.max(2.2, gf.size * scale * 1.45);
+          ctx.globalAlpha = alpha;
+          ctx.drawImage(STAR_SPRITES[gf.spriteIdx], sx - s, sy - s, s * 2, s * 2);
+        } else {
+          const r = Math.max(0.7, gf.size * scale * 0.48);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = gf.color;
+          ctx.beginPath();
+          ctx.arc(sx, sy, r, 0, Math.PI * 2);
+          ctx.fill();
         }
-      } else if (node.type === 'ringBloom') {
-        const rp = node.rp;
-        const depthAlpha = Math.max(0.16, Math.min(0.95, 1.4 - z * 0.11));
-        const tw = 0.55 + 0.45 * Math.sin(t * 3.4 + rp.phase);
-        const s = Math.max(2.4, rp.size * scale * 0.7 * (rp.bright ? 1.32 : 0.88));
-        ctx.globalAlpha = depthAlpha * tw * (rp.bright ? 0.92 : 0.58);
-        ctx.drawImage(node.glow, sx - s, sy - s, s * 2, s * 2);
-      } else if (node.type === 'miniHeart') {
-        const mh = node.mh;
-        const depthAlpha = Math.max(0.18, Math.min(0.86, 1.4 - z * 0.12)) * mh.alpha;
-        drawMiniHeart(ctx, sx, sy, mh.size * scale * 0.72, node.color, depthAlpha, mh.rot);
+      } else if (node.type === 'floatingHeart') {
+        const fh = node.fh;
+        const depthAlpha = Math.max(0.2, Math.min(0.9, 1.42 - z * 0.11)) * fh.alpha;
+        const s = Math.max(6, fh.size * scale * 0.85);
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(fh.rot);
+        ctx.globalAlpha = depthAlpha;
+        ctx.drawImage(HEART_SPRITES[fh.spriteIdx], -s, -s, s * 2, s * 2);
+        ctx.restore();
       } else if (node.type === 'orbitPhoto') {
-        const cardW = unitScale * 0.66 * scale;
-        const cardH = cardW * (318 / 268);
-        const depthAlpha = Math.max(0.4, Math.min(1, 1.58 - z * 0.13)) * node.alphaMul;
+        const cardW = unitScale * 0.64 * scale;
+        const cardH = cardW * (300 / 252);
+        const depthAlpha = Math.max(0.38, Math.min(1, 1.56 - z * 0.13)) * node.alphaMul;
 
         ctx.save();
         ctx.translate(sx, sy);
@@ -1759,12 +1537,12 @@
 
         clickableCards.push({ x: sx, y: sy, w: cardW * node.yawCos, h: cardH, src: node.photo.src });
       } else if (node.type === 'fallingPhoto') {
-        const cardW = unitScale * 0.56 * scale * node.scaleMul;
-        const cardH = cardW * (318 / 268);
+        const cardW = unitScale * 0.54 * scale * node.scaleMul;
+        const cardH = cardW * (300 / 252);
         let fadeEdge = 1;
-        if (node.yWorld < -2.7) fadeEdge = Math.max(0, (node.yWorld + 4.0) / 1.3);
-        else if (node.yWorld > 2.7) fadeEdge = Math.max(0, (4.0 - node.yWorld) / 1.3);
-        const depthAlpha = Math.max(0.24, Math.min(0.96, 1.48 - z * 0.12)) * fadeEdge;
+        if (node.yWorld < -worldSpanY + 0.7) fadeEdge = Math.max(0, (node.yWorld + worldSpanY + 0.5) / 1.2);
+        else if (node.yWorld > worldSpanY - 0.7) fadeEdge = Math.max(0, (worldSpanY + 0.6 - node.yWorld) / 1.3);
+        const depthAlpha = Math.max(0.24, Math.min(0.95, 1.46 - z * 0.12)) * fadeEdge;
 
         ctx.save();
         ctx.translate(sx, sy);
@@ -1782,45 +1560,132 @@
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
 
-    // 6. Vòng sóng năng lượng & pháo hoa chạm màn hình
+    // 5. HỆ THỐNG PHÁO HOA RỰC RỠ TOÀN MÀN HÌNH (Chớp sáng + Đạn bay lên + Tia pháo hoa liễu rủ & trái tim)
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    for (let i = shockwaves.length - 1; i >= 0; i -= 1) {
-      const wv = shockwaves[i];
-      wv.life += dt;
-      if (wv.life >= wv.maxLife) {
-        shockwaves.splice(i, 1);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // 5a. Chớp hào quang mềm tại tâm pháo hoa vừa nổ
+    for (let i = fireworkFlashes.length - 1; i >= 0; i -= 1) {
+      const fl = fireworkFlashes[i];
+      fl.life += dt;
+      if (fl.life >= fl.maxLife) {
+        fireworkFlashes.splice(i, 1);
         continue;
       }
-      const p = wv.life / wv.maxLife;
-      const curR = wv.r + (wv.maxR - wv.r) * (1 - Math.pow(1 - p, 3));
-      ctx.strokeStyle = `rgba(${wv.color}, ${(1 - p) * 0.55})`;
-      ctx.lineWidth = Math.max(1, 3.2 * (1 - p));
+      const p = fl.life / fl.maxLife;
+      const alpha = (1 - p) * 0.42;
+      const g = ctx.createRadialGradient(fl.x, fl.y, 0, fl.x, fl.y, fl.r * (0.6 + p * 0.5));
+      g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+      g.addColorStop(0.4, `rgba(96, 195, 255, ${alpha * 0.55})`);
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.arc(wv.x, wv.y, curR, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.arc(fl.x, fl.y, fl.r * (0.6 + p * 0.5), 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    for (let i = bursts.length - 1; i >= 0; i -= 1) {
-      const b = bursts[i];
-      b.life += dt;
-      if (b.life >= b.maxLife) {
-        bursts.splice(i, 1);
+    // 5b. Đạn pháo hoa bay vọt từ dưới lên rồi phát nổ
+    for (let i = fireworkRockets.length - 1; i >= 0; i -= 1) {
+      const rk = fireworkRockets[i];
+      rk.life += dt;
+      const p = Math.min(1, rk.life / rk.maxLife);
+      const ease = 1 - Math.pow(1 - p, 2.2);
+      rk.x = rk.sx + (rk.tx - rk.sx) * ease + Math.sin(p * Math.PI * 2) * 8;
+      rk.y = rk.sy + (rk.ty - rk.sy) * ease;
+      rk.trail.push([rk.x, rk.y]);
+      if (rk.trail.length > 6) rk.trail.shift();
+
+      if (rk.trail.length >= 2) {
+        ctx.beginPath();
+        ctx.moveTo(rk.trail[0][0], rk.trail[0][1]);
+        for (let k = 1; k < rk.trail.length; k += 1) {
+          ctx.lineTo(rk.trail[k][0], rk.trail[k][1]);
+        }
+        ctx.strokeStyle = rk.color;
+        ctx.globalAlpha = 0.85;
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = 1;
+      ctx.drawImage(STAR_SPRITES[0], rk.x - 6, rk.y - 6, 12, 12);
+
+      if (rk.life >= rk.maxLife) {
+        detonateFirework(rk.tx, rk.ty, rk.forceStyle);
+        fireworkRockets.splice(i, 1);
+      }
+    }
+
+    // 5c. Các chùm tia pháo hoa nở bung kéo đuôi cong mềm mại + nhấp nháy kim tuyến cuối đuôi
+    for (let i = fireworkSparks.length - 1; i >= 0; i -= 1) {
+      const sp = fireworkSparks[i];
+      sp.life += dt;
+      if (sp.life >= sp.maxLife) {
+        fireworkSparks.splice(i, 1);
         continue;
       }
+
+      const dragFactor = Math.pow(sp.drag, dt * 60);
+      sp.vx *= dragFactor;
+      sp.vy = sp.vy * dragFactor + sp.gravity * dt;
+      sp.x += sp.vx * dt;
+      sp.y += sp.vy * dt;
+
+      sp.trail.push([sp.x, sp.y]);
+      if (sp.trail.length > 7) sp.trail.shift();
+
+      const prog = sp.life / sp.maxLife;
+      let alpha = prog < 0.12 ? prog / 0.12 : Math.pow(1 - (prog - 0.12) / 0.88, 1.35);
+
+      // Hiệu ứng nổ tí tách lấp lánh (crackle strobe) ở nửa cuối quỹ đạo pháo hoa
+      if (sp.crackle && prog > 0.52) {
+        alpha *= 0.35 + 0.65 * Math.abs(Math.sin(sp.life * 38 + i));
+      }
+
+      if (sp.trail.length >= 2) {
+        ctx.beginPath();
+        ctx.moveTo(sp.trail[0][0], sp.trail[0][1]);
+        for (let k = 1; k < sp.trail.length; k += 1) {
+          ctx.lineTo(sp.trail[k][0], sp.trail[k][1]);
+        }
+        ctx.strokeStyle = sp.color;
+        ctx.globalAlpha = alpha * 0.78;
+        ctx.lineWidth = sp.size * (1 - prog * 0.45);
+        ctx.stroke();
+      }
+
+      // Đầu tia pháo hoa phát sáng lấp lánh
+      const headR = Math.max(2.2, sp.size * 2.4 * (1 - prog * 0.4));
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(STAR_SPRITES[i % STAR_SPRITES.length], sp.x - headR, sp.y - headR, headR * 2, headR * 2);
+    }
+
+    // 5d. Hạt tia sáng phụ khi chạm màn hình
+    for (let i = tapSparks.length - 1; i >= 0; i -= 1) {
+      const b = tapSparks[i];
+      b.life += dt;
+      if (b.life >= b.maxLife) {
+        tapSparks.splice(i, 1);
+        continue;
+      }
+      b.px = b.x;
+      b.py = b.y;
       b.vx *= Math.pow(b.drag, dt * 60);
       b.vy = b.vy * Math.pow(b.drag, dt * 60) + b.gravity * dt;
       b.x += b.vx * dt;
       b.y += b.vy * dt;
-      b.rot += b.rotSpeed * dt;
 
       const prog = b.life / b.maxLife;
-      const alpha = prog < 0.14 ? prog / 0.14 : 1 - (prog - 0.14) / 0.86;
-      if (b.kind === 'star') {
-        drawStarGlint(ctx, b.x, b.y, b.size, b.color, alpha, b.rot);
-      } else {
-        drawMiniHeart(ctx, b.x, b.y, b.size, b.color, alpha, b.rot);
-      }
+      const alpha = 1 - prog;
+      ctx.strokeStyle = b.color;
+      ctx.globalAlpha = alpha * 0.85;
+      ctx.lineWidth = b.size * 0.8;
+      ctx.beginPath();
+      ctx.moveTo(b.px, b.py);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
     }
     ctx.restore();
 

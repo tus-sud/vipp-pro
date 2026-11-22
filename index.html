@@ -3,32 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#040714" />
-  <title>Trái Tim 5D Hologram 💕</title>
+  <meta name="theme-color" content="#000208" />
+  <title>Trái Tim 5D 💙</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Sân khấu 5D toàn màn hình -->
-  <canvas id="scene5d" aria-label="Hiệu ứng trái tim 5D hologram và hình ảnh xoay rơi"></canvas>
+  <!-- Sân khấu 5D nền đen sâu y hệt video mẫu -->
+  <canvas id="scene5d" aria-label="Hiệu ứng trái tim 5D ánh sáng xanh và hình ảnh xoay rơi"></canvas>
 
-  <!-- Thanh nút nổi gọn gàng góc trên phải -->
+  <!-- Nút tối giản góc trên phải -->
   <div class="hud-bar">
-    <button
-      id="themeTrigger"
-      class="hud-icon-btn"
-      type="button"
-      title="Đổi màu trái tim (Hồng trên nền Xanh / Toàn bộ Xanh / Tự đổi màu)"
-      aria-label="Đổi màu trái tim"
-    >
-      💖
-    </button>
-
     <button
       id="burstTrigger"
       class="hud-icon-btn"
       type="button"
-      title="Bùng nổ dòng xoáy & pháo hoa trái tim"
-      aria-label="Bùng nổ dòng xoáy và pháo hoa trái tim"
+      title="Kích hoạt làn sóng lửa xanh & pháo hoa"
+      aria-label="Kích hoạt hiệu ứng ánh sáng xanh"
     >
       ✨
     </button>
@@ -52,10 +42,10 @@
 
   <!-- Gợi ý nhỏ tự mờ đi -->
   <div id="gestureHint" class="gesture-hint" aria-hidden="true">
-    Kéo xoay 360° • Chạm bắn pháo hoa • Bấm 💎 đổi màu • Bấm ảnh phóng to ✨
+    Kéo xoay 360° • Chạm bắn hạt sáng • Bấm ảnh phóng to ✨
   </div>
 
-  <!-- Khung phóng to khi chạm vào bất kỳ tấm ảnh nào -->
+  <!-- Khung phóng to khi chạm vào tấm ảnh -->
   <div id="photoModal" class="photo-modal" hidden role="dialog" aria-modal="true" aria-label="Xem phóng to ảnh">
     <div class="photo-modal-card">
       <img id="photoModalImg" src="" alt="Hình ảnh phóng to" />

@@ -12,7 +12,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 48%, #0c1836 0%, #050a1a 56%, #020309 100%);
+  background: #000208;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   user-select: none;
   -webkit-user-select: none;
@@ -32,7 +32,6 @@ body {
   cursor: grabbing;
 }
 
-/* Thanh nút nhỏ gọn góc trên phải */
 .hud-bar {
   position: fixed;
   top: calc(14px + env(safe-area-inset-top, 0px));
@@ -44,64 +43,64 @@ body {
 }
 
 .hud-icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid rgba(155, 220, 255, 0.5);
-  background: rgba(14, 24, 52, 0.72);
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  background: rgba(6, 14, 34, 0.65);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: #e8f7ff;
-  font-size: 1.02rem;
+  color: #e0f2fe;
+  font-size: 0.98rem;
   display: grid;
   place-items: center;
   cursor: pointer;
   touch-action: manipulation;
-  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.28);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hud-icon-btn:hover {
-  background: rgba(28, 46, 88, 0.84);
-  box-shadow: 0 0 22px rgba(96, 200, 255, 0.55);
+  background: rgba(14, 30, 68, 0.85);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
   transform: scale(1.06);
 }
 
 .hud-icon-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.92);
 }
 
 .hud-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 14px 7px 8px;
+  padding: 6px 13px 6px 7px;
   border-radius: 999px;
-  border: 1px solid rgba(160, 224, 255, 0.52);
-  background: rgba(14, 24, 52, 0.74);
+  border: 1px solid rgba(125, 211, 252, 0.38);
+  background: rgba(6, 14, 34, 0.68);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: #ecf8ff;
+  color: #e0f2fe;
   font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   touch-action: manipulation;
-  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.3);
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.28);
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .hud-pill:not(.is-playing) {
-  animation: pulseMusicBtn 1.8s ease-in-out infinite;
+  animation: pulseMusicBtn 2s ease-in-out infinite;
 }
 
 @keyframes pulseMusicBtn {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(96, 200, 255, 0.55), 0 8px 22px rgba(56, 189, 248, 0.32); }
-  50% { box-shadow: 0 0 0 10px rgba(96, 200, 255, 0), 0 8px 28px rgba(255, 92, 168, 0.45); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.45), 0 6px 18px rgba(37, 99, 235, 0.25); }
+  50% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0), 0 6px 24px rgba(56, 189, 248, 0.45); }
 }
 
 .hud-pill:hover {
-  background: rgba(28, 46, 88, 0.85);
+  background: rgba(14, 30, 68, 0.85);
 }
 
 .hud-pill:active {
@@ -113,15 +112,15 @@ body {
 }
 
 .hud-disc {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #56d4ff, #c858ff 52%, #ff58a8);
+  background: linear-gradient(135deg, #60a5fa, #2563eb);
   color: #fff;
   display: grid;
   place-items: center;
-  font-size: 0.85rem;
-  box-shadow: 0 0 16px rgba(96, 196, 255, 0.72);
+  font-size: 0.8rem;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.65);
 }
 
 .hud-pill.is-playing .hud-disc {
@@ -135,15 +134,15 @@ body {
 .hud-eq {
   display: inline-flex;
   align-items: flex-end;
-  gap: 3px;
-  height: 13px;
+  gap: 2.5px;
+  height: 12px;
 }
 
 .hud-eq span {
-  width: 3px;
+  width: 2.5px;
   height: 4px;
   border-radius: 99px;
-  background: #8be4ff;
+  background: #7dd3fc;
 }
 
 .hud-pill.is-playing .hud-eq span:nth-child(1) {
@@ -160,25 +159,24 @@ body {
 
 @keyframes eqBar {
   from { height: 4px; }
-  to { height: 13px; }
+  to { height: 12px; }
 }
 
-/* Gợi ý thao tác 5D tự ẩn */
 .gesture-hint {
   position: fixed;
   left: 50%;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
   z-index: 15;
-  padding: 7px 16px;
+  padding: 6px 15px;
   border-radius: 999px;
-  background: rgba(10, 18, 42, 0.62);
-  border: 1px solid rgba(152, 218, 255, 0.34);
+  background: rgba(4, 10, 26, 0.6);
+  border: 1px solid rgba(125, 211, 252, 0.25);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  color: rgba(232, 246, 255, 0.94);
-  font-size: 0.76rem;
-  font-weight: 600;
+  color: rgba(214, 238, 255, 0.85);
+  font-size: 0.74rem;
+  font-weight: 500;
   white-space: nowrap;
   pointer-events: none;
   transition: opacity 0.8s ease, transform 0.8s ease;
@@ -189,7 +187,6 @@ body {
   transform: translate(-50%, 10px);
 }
 
-/* Khung phóng to ảnh phát sáng */
 .photo-modal {
   position: fixed;
   inset: 0;
@@ -198,11 +195,11 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(4, 8, 22, 0.82);
+  background: rgba(0, 3, 12, 0.86);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   cursor: pointer;
-  animation: modalFade 0.24s ease both;
+  animation: modalFade 0.22s ease both;
 }
 
 .photo-modal[hidden] {
@@ -217,25 +214,25 @@ body {
 .photo-modal-card {
   max-width: min(90vw, 480px);
   max-height: 84dvh;
-  padding: 10px;
-  border-radius: 26px;
-  background: linear-gradient(145deg, rgba(164, 226, 255, 0.34), rgba(255, 118, 198, 0.24));
-  border: 1.5px solid rgba(206, 238, 255, 0.78);
+  padding: 8px;
+  border-radius: 22px;
+  background: rgba(14, 28, 60, 0.55);
+  border: 1px solid rgba(147, 197, 253, 0.55);
   box-shadow:
-    0 24px 68px rgba(0, 0, 0, 0.68),
-    0 0 54px rgba(56, 189, 248, 0.5);
-  animation: modalPop 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    0 24px 64px rgba(0, 0, 0, 0.75),
+    0 0 42px rgba(56, 189, 248, 0.35);
+  animation: modalPop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes modalPop {
-  from { transform: scale(0.8); opacity: 0; }
+  from { transform: scale(0.84); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
 .photo-modal-card img {
   display: block;
   max-width: 100%;
-  max-height: calc(84dvh - 20px);
-  border-radius: 18px;
+  max-height: calc(84dvh - 16px);
+  border-radius: 15px;
   object-fit: contain;
 }
