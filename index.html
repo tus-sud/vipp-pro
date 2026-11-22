@@ -3,37 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#140519" />
+  <meta name="theme-color" content="#0d0318" />
   <title>Trái Tim 5D 💕</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Sân khấu 5D toàn màn hình (không lời chúc, thuần hiệu ứng hình ảnh & trái tim) -->
+  <!-- Sân khấu 5D toàn màn hình -->
   <canvas id="scene5d" aria-label="Hiệu ứng trái tim 5D và hình ảnh xoay rơi"></canvas>
 
-  <!-- Nút nhạc nền góc trên phải (bấm để bật/tắt nhạc) -->
-  <button
-    id="musicToggle"
-    class="hud-pill"
-    type="button"
-    aria-pressed="false"
-    aria-label="Bật hoặc tắt nhạc nền"
-  >
-    <span class="hud-disc" aria-hidden="true">♪</span>
-    <span id="musicLabel" class="hud-label">Bật nhạc</span>
-    <span class="hud-eq" aria-hidden="true">
-      <span></span>
-      <span></span>
-      <span></span>
-    </span>
-  </button>
+  <!-- Thanh nút nổi siêu gọn góc trên phải -->
+  <div class="hud-bar">
+    <button
+      id="burstTrigger"
+      class="hud-icon-btn"
+      type="button"
+      title="Bùng nổ pháo hoa trái tim"
+      aria-label="Bùng nổ pháo hoa trái tim"
+    >
+      ✨
+    </button>
 
-  <!-- Gợi ý nhỏ tự mờ đi sau vài giây -->
-  <div id="gestureHint" class="gesture-hint" aria-hidden="true">
-    Kéo để xoay 360° • Chạm để bắn tim &amp; bật nhạc ✨
+    <button
+      id="musicToggle"
+      class="hud-pill"
+      type="button"
+      aria-pressed="false"
+      aria-label="Bật hoặc tắt nhạc nền"
+    >
+      <span class="hud-disc" aria-hidden="true">♪</span>
+      <span id="musicLabel" class="hud-label">Bật nhạc</span>
+      <span class="hud-eq" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
   </div>
 
-  <!-- Khung phóng to khi chạm trực tiếp vào một tấm ảnh -->
+  <!-- Gợi ý nhỏ tự mờ đi -->
+  <div id="gestureHint" class="gesture-hint" aria-hidden="true">
+    Kéo xoay 360° • Chạm bắn pháo hoa tim • Bấm ảnh để phóng to ✨
+  </div>
+
+  <!-- Khung phóng to khi chạm vào bất kỳ tấm ảnh nào -->
   <div id="photoModal" class="photo-modal" hidden role="dialog" aria-modal="true" aria-label="Xem phóng to ảnh">
     <div class="photo-modal-card">
       <img id="photoModalImg" src="" alt="Hình ảnh phóng to" />
