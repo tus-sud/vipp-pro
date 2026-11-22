@@ -3,22 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0d0318" />
-  <title>Trái Tim 5D 💕</title>
+  <meta name="theme-color" content="#040714" />
+  <title>Trái Tim 5D Hologram 💕</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!-- Sân khấu 5D toàn màn hình -->
-  <canvas id="scene5d" aria-label="Hiệu ứng trái tim 5D và hình ảnh xoay rơi"></canvas>
+  <canvas id="scene5d" aria-label="Hiệu ứng trái tim 5D hologram và hình ảnh xoay rơi"></canvas>
 
-  <!-- Thanh nút nổi siêu gọn góc trên phải -->
+  <!-- Thanh nút nổi gọn gàng góc trên phải -->
   <div class="hud-bar">
+    <button
+      id="themeTrigger"
+      class="hud-icon-btn"
+      type="button"
+      title="Đổi màu ánh sáng (Xanh Hologram / Hồng Pha Lê / Tự đổi màu)"
+      aria-label="Đổi tông màu ánh sáng"
+    >
+      💎
+    </button>
+
     <button
       id="burstTrigger"
       class="hud-icon-btn"
       type="button"
-      title="Bùng nổ pháo hoa trái tim"
-      aria-label="Bùng nổ pháo hoa trái tim"
+      title="Bùng nổ dòng xoáy & pháo hoa trái tim"
+      aria-label="Bùng nổ dòng xoáy và pháo hoa trái tim"
     >
       ✨
     </button>
@@ -42,7 +52,7 @@
 
   <!-- Gợi ý nhỏ tự mờ đi -->
   <div id="gestureHint" class="gesture-hint" aria-hidden="true">
-    Kéo xoay 360° • Chạm bắn pháo hoa tim • Bấm ảnh để phóng to ✨
+    Kéo xoay 360° • Chạm bắn pháo hoa • Bấm 💎 đổi màu • Bấm ảnh phóng to ✨
   </div>
 
   <!-- Khung phóng to khi chạm vào bất kỳ tấm ảnh nào -->
