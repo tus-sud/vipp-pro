@@ -13,6 +13,16 @@
     orbitPhotoCount: Math.max(8, Math.min(14, rawCfg.orbitPhotoCount || Math.max(11, photoList.length))),
     fallingPhotoCount: Math.max(18, Math.min(28, (rawCfg.fallingPhotoCount || 16) + 6)),
     autoRotateSpeed: typeof rawCfg.autoRotateSpeed === 'number' ? rawCfg.autoRotateSpeed : 0.34,
+    textStartDelay: typeof rawCfg.textStartDelay === 'number' ? rawCfg.textStartDelay : 30,
+    letterTitle: rawCfg.letterTitle || 'Gửi Chị, Người Em Thương...',
+    letterSignature: rawCfg.letterSignature || '— Thương chị, theo cách dịu dàng và lâu dài nhất ♥',
+    fireworkTexts:
+      Array.isArray(rawCfg.fireworkTexts) && rawCfg.fireworkTexts.length > 0
+        ? rawCfg.fireworkTexts.filter(Boolean)
+        : [
+            'Giữa muôn vàn vì sao lấp lánh đêm nay,\ncó một điều em đã giữ trong lòng từ rất lâu...',
+            'Nếu trái tim chị cũng đang khẽ rung lên một nhịp dịu dàng...\nCho phép em được thương chị từ hôm nay, chị nhé? ♥',
+          ],
   };
 
   const canvas = document.getElementById('scene5d');
@@ -644,18 +654,53 @@
     return { field, floatingHearts };
   }
 
-  // 4) 11 ảnh xoay 3D rộng quanh trái tim + 22 ảnh rơi 5D trải đều từ mép trái sang mép phải màn hình!
+  // 4) 14 khung ảnh xoay 3D quanh trái tim (đủ 11 ảnh + 3 ảnh đối xứng để khi ghép thành Khung Trái Tim Lớn ở màn kết cực kỳ cân đối!)
+  function createHeartContourLookup() {
+    const N = 720;
+    const pts = [];
+    const cum = [0];
+    for (let i = 0; i <= N; i += 1) {
+      const t = (Math.PI * 2 * i) / N;
+      const hx = Math.pow(Math.sin(t), 3);
+      const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t) - 1.2) / 16;
+      pts.push([hx, hy]);
+      if (i > 0) cum.push(cum[i - 1] + Math.hypot(hx - pts[i - 1][0], hy - pts[i - 1][1]));
+    }
+    const total = cum[N];
+    return {
+      pts,
+      sampleAtFraction(frac) {
+        const target = ((frac % 1) + 1) % 1 * total;
+        let lo = 0;
+        let hi = N;
+        while (lo < hi) {
+          const mid = (lo + hi) >>> 1;
+          if (cum[mid] < target) lo = mid + 1;
+          else hi = mid;
+        }
+        return pts[lo];
+      },
+    };
+  }
+
+  const heartContour = createHeartContourLookup();
+
   function createOrbitPhotos(count) {
+    const ringCount = Math.max(14, count);
     const list = [];
-    for (let i = 0; i < count; i += 1) {
+    for (let i = 0; i < ringCount; i += 1) {
+      const [hcx, hcy] = heartContour.sampleAtFraction(i / ringCount);
       list.push({
         photoIndex: i % loadedPhotos.length,
-        baseAngle: (Math.PI * 2 * i) / count,
+        baseAngle: (Math.PI * 2 * i) / ringCount,
         radiusOffset: i % 2 === 0 ? 0.14 : -0.1,
         yOffset: (i % 2 === 0 ? 0.28 : -0.28) + HEART_CENTER_Y,
         yBobAmp: rand(0.08, 0.16),
         yBobPhase: rand(0, Math.PI * 2),
         tiltPhase: rand(0, Math.PI * 2),
+        // Tọa độ mục tiêu trên Khung Trái Tim Ảnh Khổng Lồ ở màn kết
+        heartTargetX: hcx * 1.72,
+        heartTargetY: hcy * 1.66 - 0.06,
       });
     }
     return list;
@@ -693,7 +738,14 @@
   let zoom = 1;
   let targetZoom = 1;
 
-  let elapsed = parseFloat(new URLSearchParams(location.search).get('t')) || 3.5;
+  let elapsed =
+    location.hash === '#test30'
+      ? 3.5 + cfg.textStartDelay + 2.4
+      : location.hash === '#testLetter'
+        ? 3.5 + cfg.textStartDelay + cfg.fireworkTexts.length * 6.6 + 2.4
+        : location.hash === '#testFinale'
+          ? 3.5 + cfg.textStartDelay + cfg.fireworkTexts.length * 6.6 + 18.0 + 3.2
+          : parseFloat(new URLSearchParams(location.search).get('t')) || 3.5;
   let manualAuraBoost = 0;
   let lastTime = performance.now();
   let nextMeteorTime = 0.8;
@@ -842,6 +894,459 @@
     }
   }
 
+  // ============================================================
+  // 3B. HỆ THỐNG MẢNH PHÁO HOA GHÉP THÀNH BÀI VĂN TỎ TÌNH CỔ ĐIỂN SAU 30 GIÂY
+  // ============================================================
+  const textMorphParticles = [];
+  let currentPhraseIdx = -1;
+  let phraseTimer = 0;
+  let finaleHeartFormation = 0; // 0: xoay 3D bình thường | 1: 11+ ảnh bay về xếp thành Khung Trái Tim Lớn ở màn kết!
+  const PHRASE_DURATION = 6.6; // Mỗi đoạn văn pháo hoa ghép & tỏa sáng trong 6.6 giây
+  const LETTER_HOLD_DURATION = 15.0; // Thời gian hiển thị trọn vẹn bức thư tỏ tình
+  const FINALE_HEART_DURATION = 18.0; // Thời gian màn kết: ảnh xếp hình Trái Tim lớn + mưa pháo hoa trái tim!
+  let cachedLayout = null;
+
+  // Chia đoạn văn thành các dòng cân đối theo phong cách thư cổ điển (Serif)
+  function layoutStanzaLines(g, phrase, maxW) {
+    const rawLines = phrase.split('\n');
+    const finalLines = [];
+    for (let r = 0; r < rawLines.length; r += 1) {
+      const words = rawLines[r].trim().split(/\s+/);
+      let line = '';
+      for (let i = 0; i < words.length; i += 1) {
+        const test = line ? `${line} ${words[i]}` : words[i];
+        if (g.measureText(test).width > maxW && line) {
+          finalLines.push(line);
+          line = words[i];
+        } else {
+          line = test;
+        }
+      }
+      if (line) finalLines.push(line);
+    }
+    return finalLines;
+  }
+
+  // Quét từng đoạn của bài văn tỏ tình cổ điển thành hàng nghìn mảnh pháo hoa
+  function samplePhrasePoints(phrase, isFullEssay) {
+    const off = document.createElement('canvas');
+    const oW = Math.min(1180, Math.max(360, Math.floor(width * 0.88)));
+    const oH = isFullEssay ? Math.min(760, Math.floor(height * 0.86)) : 250;
+    off.width = oW;
+    off.height = oH;
+    const og = off.getContext('2d');
+
+    if (isFullEssay) {
+      // Bố cục trọn vẹn bức thư tỏ tình cổ điển sau khi ghép xong các đoạn
+      let fontSize = Math.min(22, Math.max(12, Math.floor(Math.min(oW / 32, oH / 26))));
+      const titleSize = Math.round(fontSize * 1.38);
+      const lineGap = Math.round(fontSize * 1.44);
+
+      og.font = `italic 600 ${fontSize}px "Times New Roman", "Palatino Linotype", serif`;
+      const allLines = [];
+      cfg.fireworkTexts.forEach((stanza) => {
+        const lns = layoutStanzaLines(og, stanza, oW * 0.86);
+        lns.forEach((l) => allLines.push(l));
+      });
+
+      const totalTextH = titleSize + 18 + allLines.length * lineGap + 24 + fontSize;
+      const startY = Math.max(26, (oH - totalTextH) * 0.5);
+      const boxTop = Math.max(8, startY - 22);
+      const boxHeight = Math.min(oH - boxTop - 8, totalTextH + 46);
+
+      // Vẽ khung viền mảnh pháo hoa cổ điển để lấy mẫu hạt
+      og.strokeStyle = '#ffffff';
+      og.lineWidth = 2.5;
+      drawRoundedRect(og, 16, boxTop, oW - 32, boxHeight, 22);
+      og.stroke();
+
+      og.fillStyle = '#ffffff';
+      og.textAlign = 'center';
+      og.textBaseline = 'top';
+      og.font = `italic 700 ${titleSize}px "Times New Roman", "Palatino Linotype", serif`;
+      og.fillText(cfg.letterTitle, oW * 0.5, startY);
+
+      const imgData = og.getImageData(0, 0, oW, oH).data;
+      const step = 4;
+      const pts = [];
+      const offsetX = (width - oW) * 0.5;
+      const offsetY = (height - oH) * 0.48;
+
+      for (let y = 0; y < oH; y += step) {
+        for (let x = 0; x < oW; x += step) {
+          if (imgData[(y * oW + x) * 4 + 3] > 110) {
+            pts.push([offsetX + x, offsetY + y]);
+          }
+        }
+      }
+
+      cachedLayout = {
+        isFullEssay: true,
+        oW,
+        oH,
+        offsetX,
+        offsetY,
+        startY,
+        boxTop,
+        boxHeight,
+        totalTextH,
+        fontSize,
+        titleSize,
+        lineGap,
+        lines: allLines,
+      };
+      return pts;
+    }
+
+    // Bố cục từng đoạn văn (1-3 dòng chữ Serif cổ điển ấm áp trên bầu trời)
+    let fontSize = Math.min(42, Math.max(19, Math.floor(oW / 21)));
+    og.font = `italic 700 ${fontSize}px "Times New Roman", "Palatino Linotype", serif`;
+    let lines = layoutStanzaLines(og, phrase, oW * 0.9);
+    while (lines.length > 3 && fontSize > 17) {
+      fontSize -= 2;
+      og.font = `italic 700 ${fontSize}px "Times New Roman", "Palatino Linotype", serif`;
+      lines = layoutStanzaLines(og, phrase, oW * 0.9);
+    }
+
+    const lineGap = Math.round(fontSize * 1.42);
+    const blockH = lines.length * lineGap;
+    const startY = (oH - blockH) * 0.5 + fontSize * 0.5;
+
+    og.clearRect(0, 0, oW, oH);
+    og.fillStyle = '#ffffff';
+    og.textAlign = 'center';
+    og.textBaseline = 'middle';
+    for (let i = 0; i < lines.length; i += 1) {
+      og.fillText(lines[i], oW * 0.5, startY + i * lineGap);
+    }
+
+    const imgData = og.getImageData(0, 0, oW, oH).data;
+    const step = fontSize >= 32 ? 3 : 2;
+    const pts = [];
+    const offsetX = (width - oW) * 0.5;
+    const targetCenterY = Math.max(92, height * 0.21);
+    const offsetY = targetCenterY - oH * 0.5;
+
+    for (let y = 0; y < oH; y += step) {
+      for (let x = 0; x < oW; x += step) {
+        if (imgData[(y * oW + x) * 4 + 3] > 120) {
+          pts.push([offsetX + x, offsetY + y]);
+        }
+      }
+    }
+
+    cachedLayout = {
+      isFullEssay: false,
+      oW,
+      oH,
+      offsetX,
+      offsetY,
+      startY,
+      fontSize,
+      lineGap,
+      lines,
+      targetCenterY,
+    };
+    return pts;
+  }
+
+  // Nổ pháo hoa lớn rồi điều khiển hàng nghìn mảnh pháo hoa bay hội tụ ghép thành câu văn cổ điển!
+  function triggerFireworkTextPhrase(phraseIdx) {
+    const phrases = cfg.fireworkTexts;
+    if (!phrases || phrases.length === 0) return;
+
+    // Sau khi ghép hết từng đoạn văn -> ghép thành bức thư tỏ tình cổ điển trọn vẹn!
+    const totalStages = phrases.length + 1;
+    const stage = phraseIdx % totalStages;
+    const isFullEssay = stage === phrases.length;
+    const phrase = isFullEssay ? '' : phrases[stage];
+
+    const pts = samplePhrasePoints(phrase, isFullEssay);
+    if (pts.length === 0) return;
+
+    // Giới hạn tối đa 1.800 hạt để mọi điện thoại đều mượt 60fps
+    let sampledPts = pts;
+    if (pts.length > 1800) {
+      sampledPts = [];
+      const stride = pts.length / 1800;
+      for (let i = 0; i < 1800; i += 1) {
+        sampledPts.push(pts[Math.floor(i * stride)]);
+      }
+    }
+
+    const origins = [
+      [width * 0.25, height * 0.22],
+      [width * 0.5, height * 0.18],
+      [width * 0.75, height * 0.22],
+    ];
+    origins.forEach(([ox, oy]) => {
+      fireworkFlashes.push({ x: ox, y: oy, r: 165, color: '#fde68a', life: 0, maxLife: 0.55 });
+    });
+
+    // Bảng màu pháo hoa cổ điển ấm áp: Vàng ánh nến, Trắng ngà, Xanh sao băng & Hồng phấn
+    const colors = ['#fffbeb', '#fde68a', '#bae6fd', '#fcd34d', '#e0f2fe', '#fbcfe8'];
+
+    const oldCount = textMorphParticles.length;
+    const newCount = sampledPts.length;
+
+    for (let i = 0; i < newCount; i += 1) {
+      const [tx, ty] = sampledPts[i];
+      const orig = origins[i % origins.length];
+      const ang = rand(0, Math.PI * 2);
+      const burstRadius = rand(45, 190);
+      const bx = orig[0] + Math.cos(ang) * burstRadius;
+      const by = orig[1] + Math.sin(ang) * burstRadius;
+
+      if (i < oldCount) {
+        const p = textMorphParticles[i];
+        p.sx = p.x;
+        p.sy = p.y;
+        p.bx = p.x + Math.cos(ang) * rand(35, 120);
+        p.by = p.y + Math.sin(ang) * rand(35, 120);
+        p.tx = tx;
+        p.ty = ty;
+        p.delay = rand(0, 0.28);
+        p.trail.length = 0;
+      } else {
+        textMorphParticles.push({
+          x: orig[0],
+          y: orig[1],
+          sx: orig[0],
+          sy: orig[1],
+          bx,
+          by,
+          tx,
+          ty,
+          delay: rand(0, 0.32),
+          size: rand(1.1, 2.2),
+          color: colors[i % colors.length],
+          spriteIdx: i % STAR_SPRITES.length,
+          twPhase: rand(0, Math.PI * 2),
+          twSpeed: rand(3.2, 6.8),
+          trail: [],
+        });
+      }
+    }
+    if (oldCount > newCount) {
+      textMorphParticles.length = newCount;
+    }
+  }
+
+  function updateAndDrawFireworkText(dt, t) {
+    const realOpenSeconds = Math.max(0, t - 3.5);
+    if (realOpenSeconds < cfg.textStartDelay) {
+      finaleHeartFormation = 0;
+      return;
+    }
+
+    const textTime = realOpenSeconds - cfg.textStartDelay;
+    const stanzasLen = cfg.fireworkTexts.length * PHRASE_DURATION;
+    const letterEnd = stanzasLen + LETTER_HOLD_DURATION;
+    const cycleLen = letterEnd + FINALE_HEART_DURATION;
+    const cyclePos = textTime % cycleLen;
+
+    // MÀN KẾT CAO TRÀO (sau khi đọc xong bức thư):
+    // Các tấm ảnh tự động bay về xếp thành Khung Trái Tim Lớn ôm lấy Trái Tim 3D + mưa pháo hoa trái tim rợp trời!
+    if (cyclePos >= letterEnd) {
+      const finalePos = cyclePos - letterEnd;
+      const enterP = smoothstep(0.0, 2.0, finalePos);
+      const exitP = 1 - smoothstep(FINALE_HEART_DURATION - 1.8, FINALE_HEART_DURATION, finalePos);
+      finaleHeartFormation = enterP * exitP;
+
+      if (currentPhraseIdx !== -2) {
+        currentPhraseIdx = -2;
+        textMorphParticles.length = 0;
+        launchGrandFinale();
+      }
+      return;
+    }
+
+    finaleHeartFormation = 0;
+
+    let targetIdx;
+    let stageDuration;
+    if (cyclePos < stanzasLen) {
+      targetIdx = Math.floor(cyclePos / PHRASE_DURATION);
+      phraseTimer = cyclePos % PHRASE_DURATION;
+      stageDuration = PHRASE_DURATION;
+    } else {
+      targetIdx = cfg.fireworkTexts.length;
+      phraseTimer = cyclePos - stanzasLen;
+      stageDuration = LETTER_HOLD_DURATION;
+    }
+
+    if (targetIdx !== currentPhraseIdx) {
+      currentPhraseIdx = targetIdx;
+      triggerFireworkTextPhrase(currentPhraseIdx);
+    }
+
+    if (textMorphParticles.length === 0 || !cachedLayout) return;
+
+    ctx.save();
+    const bgAlpha =
+      phraseTimer < 0.9
+        ? smoothstep(0.15, 0.9, phraseTimer)
+        : phraseTimer > stageDuration - 0.8
+          ? 1 - smoothstep(stageDuration - 0.8, stageDuration, phraseTimer)
+          : 1;
+
+    // 1. Nền sương đêm ấm dịu phía sau giúp câu chữ cổ điển nổi bật rõ ràng
+    if (cachedLayout.isFullEssay) {
+      const boxX = cachedLayout.offsetX + 16;
+      const boxY = cachedLayout.offsetY + cachedLayout.boxTop;
+      const boxW = cachedLayout.oW - 32;
+      const boxH = cachedLayout.boxHeight;
+
+      ctx.save();
+      drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 22);
+      ctx.fillStyle = `rgba(4, 12, 34, ${0.78 * bgAlpha})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(253, 230, 138, ${0.42 * bgAlpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      const textCenterY = cachedLayout.targetCenterY;
+      const haloR = Math.min(width * 0.48, 560);
+      const halo = ctx.createRadialGradient(width * 0.5, textCenterY, 10, width * 0.5, textCenterY, haloR);
+      halo.addColorStop(0, `rgba(3, 10, 30, ${0.64 * bgAlpha})`);
+      halo.addColorStop(0.6, `rgba(3, 10, 30, ${0.28 * bgAlpha})`);
+      halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(width * 0.5, textCenterY, haloR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+
+    // 2. Các mảnh pháo hoa bay hội tụ ghép thành từng chữ
+    for (let i = 0; i < textMorphParticles.length; i += 1) {
+      const p = textMorphParticles[i];
+      const localT = Math.max(0, phraseTimer - p.delay);
+
+      let nx;
+      let ny;
+      let isMovingFast = false;
+
+      if (localT < 0.52) {
+        const bProg = smoothstep(0, 0.52, localT);
+        nx = p.sx + (p.bx - p.sx) * bProg;
+        ny = p.sy + (p.by - p.sy) * bProg;
+        isMovingFast = true;
+      } else if (localT < 1.65) {
+        const mProg = smoothstep(0.52, 1.65, localT);
+        const arc = Math.sin(mProg * Math.PI) * 24;
+        nx = p.bx + (p.tx - p.bx) * mProg + Math.cos(p.twPhase) * arc;
+        ny = p.by + (p.ty - p.by) * mProg + Math.sin(p.twPhase) * arc;
+        isMovingFast = mProg < 0.92;
+      } else if (phraseTimer < stageDuration - 0.75) {
+        const shimmer = 1.1;
+        nx = p.tx + Math.sin(t * p.twSpeed + p.twPhase) * shimmer;
+        ny = p.ty + Math.cos(t * p.twSpeed + p.twPhase) * shimmer;
+      } else {
+        const outP = smoothstep(stageDuration - 0.75, stageDuration, phraseTimer);
+        nx = p.tx + Math.sin(p.twPhase) * outP * 36;
+        ny = p.ty + outP * outP * 54;
+      }
+
+      p.x = nx;
+      p.y = ny;
+
+      if (isMovingFast) {
+        p.trail.push([nx, ny]);
+        if (p.trail.length > 5) p.trail.shift();
+        if (p.trail.length >= 2) {
+          ctx.beginPath();
+          ctx.moveTo(p.trail[0][0], p.trail[0][1]);
+          for (let k = 1; k < p.trail.length; k += 1) {
+            ctx.lineTo(p.trail[k][0], p.trail[k][1]);
+          }
+          ctx.strokeStyle = p.color;
+          ctx.globalAlpha = 0.65;
+          ctx.lineWidth = p.size * 0.75;
+          ctx.stroke();
+        }
+      } else if (p.trail.length > 0) {
+        p.trail.length = 0;
+      }
+
+      const tw = 0.58 + 0.42 * Math.sin(t * p.twSpeed + p.twPhase);
+      if (i % 4 === 0) {
+        const s = p.size * 2.2;
+        ctx.globalAlpha = tw * 0.85;
+        ctx.drawImage(STAR_SPRITES[p.spriteIdx], nx - s, ny - s, s * 2, s * 2);
+      } else {
+        ctx.globalAlpha = tw * 0.82;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(nx, ny, p.size * 0.85, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 3. Khi các mảnh pháo hoa vừa hội tụ xong vào vị trí chữ -> thắp sáng nét chữ Serif cổ điển ấm áp bên trong hạt pháo hoa!
+    const textGlowAlpha =
+      phraseTimer < 1.15
+        ? 0
+        : phraseTimer < 1.85
+          ? smoothstep(1.15, 1.85, phraseTimer)
+          : phraseTimer > stageDuration - 0.75
+            ? 1 - smoothstep(stageDuration - 0.75, stageDuration, phraseTimer)
+            : 1;
+
+    if (textGlowAlpha > 0.01) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(253, 224, 138, 0.85)';
+      ctx.shadowBlur = 16;
+
+      if (cachedLayout.isFullEssay) {
+        const cx = width * 0.5;
+        const baseY = cachedLayout.offsetY + cachedLayout.startY;
+        ctx.globalAlpha = textGlowAlpha * 0.96;
+        ctx.textBaseline = 'top';
+
+        // Tiêu đề thư tỏ tình cổ điển
+        ctx.font = `italic 700 ${cachedLayout.titleSize}px "Times New Roman", "Palatino Linotype", serif`;
+        ctx.fillStyle = '#fde68a';
+        ctx.fillText(cfg.letterTitle, cx, baseY);
+
+        // Toàn bộ các dòng của bài văn tỏ tình ấm áp
+        ctx.font = `italic 600 ${cachedLayout.fontSize}px "Times New Roman", "Palatino Linotype", serif`;
+        ctx.fillStyle = '#fffbeb';
+        const linesStart = baseY + cachedLayout.titleSize + 18;
+        for (let i = 0; i < cachedLayout.lines.length; i += 1) {
+          ctx.fillText(cachedLayout.lines[i], cx, linesStart + i * cachedLayout.lineGap);
+        }
+
+        // Chữ ký kết thư
+        ctx.font = `italic 700 ${cachedLayout.fontSize}px "Times New Roman", "Palatino Linotype", serif`;
+        ctx.fillStyle = '#fbd38d';
+        ctx.fillText(
+          cfg.letterSignature,
+          cx,
+          linesStart + cachedLayout.lines.length * cachedLayout.lineGap + 14
+        );
+      } else {
+        const cx = width * 0.5;
+        const baseY = cachedLayout.offsetY + cachedLayout.startY;
+        ctx.globalAlpha = textGlowAlpha * 0.95;
+        ctx.textBaseline = 'middle';
+        ctx.font = `italic 700 ${cachedLayout.fontSize}px "Times New Roman", "Palatino Linotype", serif`;
+        ctx.fillStyle = '#fffbeb';
+        for (let i = 0; i < cachedLayout.lines.length; i += 1) {
+          ctx.fillText(cachedLayout.lines[i], cx, baseY + i * cachedLayout.lineGap);
+        }
+      }
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
   window.addEventListener('resize', updateDimensions);
 
   // Làm nóng sẵn dòng chảy khói xanh
@@ -918,6 +1423,25 @@
     manualAuraBoost = 1.0;
     launchGrandFinale();
     spawnMeteor();
+    // Bấm ✨ để chuyển nhanh qua từng đoạn văn -> bức thư đầy đủ -> màn kết ảnh xếp hình Trái Tim lớn!
+    const stanzasLen = cfg.fireworkTexts.length * PHRASE_DURATION;
+    const letterEnd = stanzasLen + LETTER_HOLD_DURATION;
+    const cycleLen = letterEnd + FINALE_HEART_DURATION;
+    const realOpen = Math.max(0, elapsed - 3.5);
+
+    if (realOpen < cfg.textStartDelay) {
+      elapsed = 3.5 + cfg.textStartDelay;
+    } else {
+      const cyclePos = (realOpen - cfg.textStartDelay) % cycleLen;
+      if (cyclePos < stanzasLen) {
+        const nextStage = Math.floor(cyclePos / PHRASE_DURATION) + 1;
+        elapsed = 3.5 + cfg.textStartDelay + nextStage * PHRASE_DURATION;
+      } else if (cyclePos < letterEnd) {
+        elapsed = 3.5 + cfg.textStartDelay + letterEnd + 0.1;
+      } else {
+        elapsed = 3.5 + cfg.textStartDelay;
+      }
+    }
     if (navigator.vibrate) navigator.vibrate(20);
   });
 
@@ -1239,14 +1763,20 @@
       nextMeteorTime = elapsed + rand(1.4, 3.2);
     }
 
-    // Tự động bắn pháo hoa liên tục khắp màn hình (trái, phải, trên, góc)
-    if (elapsed > nextFireworkTime && fireworkSparks.length < 520) {
-      if (Math.random() < 0.45) {
-        detonateFirework(rand(width * 0.1, width * 0.9), rand(height * 0.14, height * 0.55));
+    // Tự động bắn pháo hoa liên tục khắp màn hình (khi vào Màn Kết Trái Tim Ảnh thì bắn mưa pháo hoa trái tim dày gấp 3 lần!)
+    const isFinaleActive = finaleHeartFormation > 0.15;
+    if (elapsed > nextFireworkTime && fireworkSparks.length < (isFinaleActive ? 780 : 520)) {
+      const preferHeart = isFinaleActive && Math.random() < 0.72 ? 'heart' : undefined;
+      if (Math.random() < (isFinaleActive ? 0.65 : 0.45)) {
+        detonateFirework(
+          rand(width * 0.08, width * 0.92),
+          rand(height * 0.1, height * 0.62),
+          preferHeart
+        );
       } else {
-        launchFireworkRocket();
+        launchFireworkRocket(undefined, undefined, preferHeart);
       }
-      nextFireworkTime = elapsed + rand(0.75, 1.45);
+      nextFireworkTime = elapsed + (isFinaleActive ? rand(0.32, 0.62) : rand(0.75, 1.45));
     }
 
     if (!isDragging) {
@@ -1350,16 +1880,18 @@
       renderQueue.push({ type: 'floatingHeart', z: proj.z, proj, fh });
     }
 
-    // 4c. 3.800 hạt sao mịn tạo Trái Tim 3D lớn ở trung tâm
+    // 4c. 3.800 hạt sao mịn tạo Trái Tim 3D ở trung tâm (thu gọn nhẹ vào tâm khi 14 ảnh xếp thành Khung Trái Tim Lớn bao quanh!)
     const heartSpin = t * 0.35;
     const hCos = Math.cos(heartSpin);
     const hSin = Math.sin(heartSpin);
+    const innerHeartFit = 1 - finaleHeartFormation * 0.32;
+    const effHeartScale = heartScale * innerHeartFit;
 
     for (let i = 0; i < heartDust.length; i += 1) {
       const p = heartDust[i];
-      let wx = (p.bx * hCos - p.bz * hSin) * heartScale;
-      let wz = (p.bx * hSin + p.bz * hCos) * heartScale;
-      let wy = p.by * heartScale;
+      let wx = (p.bx * hCos - p.bz * hSin) * effHeartScale;
+      let wz = (p.bx * hSin + p.bz * hCos) * effHeartScale;
+      let wy = p.by * effHeartScale;
 
       if (isRising) {
         const prog = clamp01((riseP - p.delay * 0.55) / (1 - p.delay * 0.55));
@@ -1399,7 +1931,7 @@
       renderQueue.push({ type: 'dust', z: proj.z, proj, p });
     }
 
-    // 4d. 11 tấm ảnh xoay 3D rộng thoáng quanh trái tim (tự mở rộng quỹ đạo theo màn hình ngang!)
+    // 4d. Các tấm ảnh xoay 3D quanh trái tim -> Tự động bay về xếp thành KHUNG TRÁI TIM LỚN ở màn kết!
     const orbitSpeed = 0.4;
     const orbitTilt = 0.22;
     const oCos = Math.cos(orbitTilt);
@@ -1407,6 +1939,29 @@
     const photoEnter = smoothstep(0.25, 1.35, elapsed);
     const wideOrbitX = Math.max(2.45, Math.min(3.55, worldSpanX * 0.62));
     const wideOrbitZ = 2.42;
+
+    // Vẽ đường viền tơ sáng nối thành hình Trái Tim Lớn phía sau các tấm ảnh khi vào màn kết
+    if (finaleHeartFormation > 0.05) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.beginPath();
+      const pulseR = 1 + beat * 0.04;
+      for (let s = 0; s <= 120; s += 1) {
+        const [hx, hy] = heartContour.pts[Math.floor((s / 120) * 720)];
+        const px = width * 0.5 + hx * 1.72 * pulseR * unitScale;
+        const py = height * 0.5 + (hy * 1.66 - 0.06) * pulseR * unitScale;
+        if (s === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = `rgba(125, 211, 252, ${finaleHeartFormation * 0.55})`;
+      ctx.lineWidth = 4.5;
+      ctx.stroke();
+      ctx.strokeStyle = `rgba(253, 230, 138, ${finaleHeartFormation * 0.85})`;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.restore();
+    }
 
     for (let i = 0; i < orbitPhotos.length; i += 1) {
       const item = orbitPhotos[i];
@@ -1419,16 +1974,27 @@
       const wy = oy * oCos - oz * oSin;
       const wz = oy * oSin + oz * oCos;
 
-      const proj = project3D(ox, wy, wz, cosY, sinY, cosX, sinX);
-      if (!proj) continue;
+      const projOrbit = project3D(ox, wy, wz, cosY, sinY, cosX, sinX);
+      if (!projOrbit) continue;
+
+      // Tọa độ trên màn hình khi xếp thành Vòng Trái Tim Ảnh Lớn ôm lấy Trái Tim 3D
+      const heartPulse = 1 + beat * 0.04;
+      const targetSx = width * 0.5 + item.heartTargetX * heartPulse * unitScale;
+      const targetSy = height * 0.5 + item.heartTargetY * heartPulse * unitScale;
+
+      const f = finaleHeartFormation;
+      const sx = projOrbit.sx * (1 - f) + targetSx * f;
+      const sy = projOrbit.sy * (1 - f) + targetSy * f;
+      const scale = projOrbit.scale * (1 - f) + 0.72 * f;
+      const z = projOrbit.z * (1 - f) + 4.2 * f;
 
       renderQueue.push({
         type: 'orbitPhoto',
-        z: proj.z,
-        proj,
+        z,
+        proj: { sx, sy, scale, z },
         photo: loadedPhotos[item.photoIndex],
-        tilt: Math.sin(t * 1.1 + item.tiltPhase) * 0.075,
-        yawCos: 0.78 + 0.22 * Math.cos(ang + viewY),
+        tilt: Math.sin(t * 1.1 + item.tiltPhase) * 0.075 * (1 - f * 0.6),
+        yawCos: (0.78 + 0.22 * Math.cos(ang + viewY)) * (1 - f) + 1.0 * f,
         alphaMul: photoEnter,
       });
     }
@@ -1688,6 +2254,9 @@
       ctx.stroke();
     }
     ctx.restore();
+
+    // 6. CÁC MẢNH PHÁO HOA HỘI TỤ GHÉP THÀNH CHỮ SAU 30 GIÂY!
+    updateAndDrawFireworkText(dt, t);
 
     requestAnimationFrame(render);
   }
