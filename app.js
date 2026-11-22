@@ -344,19 +344,23 @@
     },
   };
 
-  // 0: Tự chuyển Xanh Hologram <-> Hồng Pha Lê | 1: Khóa Xanh Hologram | 2: Khóa Hồng Pha Lê
+  // 0: Trái tim Hồng nổi bật trên nền hiệu ứng Xanh Neon | 1: Toàn bộ Xanh Hologram | 2: Tự luân phiên Hồng <-> Xanh
   let themeMode = 0;
-  function getActivePalette(t) {
+  function getHeartPalette(t) {
     if (themeMode === 1) return PALETTES.blue;
-    if (themeMode === 2) return PALETTES.pink;
-    // Bắt đầu bằng tông Xanh Hologram đúng chất video, sau mỗi chu kỳ 20s tự chuyển sang Hồng Pha Lê rồi quay lại!
-    return Math.floor(t / 20) % 2 === 0 ? PALETTES.blue : PALETTES.pink;
+    if (themeMode === 2) return Math.floor(t / 20) % 2 === 0 ? PALETTES.pink : PALETTES.blue;
+    return PALETTES.pink;
+  }
+
+  // Hệ hiệu ứng phía sau trái tim LUÔN mang ánh sáng Xanh Dương Neon 5D rực rỡ
+  function getBackBluePalette() {
+    return PALETTES.blue;
   }
 
   themeTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
     themeMode = (themeMode + 1) % 3;
-    themeTrigger.textContent = themeMode === 1 ? '💙' : themeMode === 2 ? '💖' : '💎';
+    themeTrigger.textContent = themeMode === 0 ? '💖' : themeMode === 1 ? '💙' : '💎';
     spawnTapBurst(width * 0.5, height * 0.5, 28);
   });
 
@@ -826,9 +830,9 @@
   }
 
   function spawnTapBurst(x, y, count = 24) {
-    const pal = getActivePalette(elapsed);
+    const pal = getHeartPalette(elapsed);
     shockwaves.push({ x, y, r: 10, maxR: 155, life: 0, maxLife: 0.78, color: pal.coreRgb });
-    shockwaves.push({ x, y, r: 4, maxR: 105, life: 0, maxLife: 0.56, color: pal.coreInner });
+    shockwaves.push({ x, y, r: 4, maxR: 105, life: 0, maxLife: 0.56, color: '115, 224, 255' });
     for (let i = 0; i < count; i += 1) {
       const a = (Math.PI * 2 * i) / count + rand(-0.24, 0.24);
       const sp = rand(80, 290);
@@ -851,12 +855,12 @@
   }
 
   function triggerVortexSupernova() {
-    const pal = getActivePalette(elapsed);
+    const pal = getHeartPalette(elapsed);
     manualSwirlBoost = 1.0;
     const cx = width * 0.5;
     const cy = height * 0.48;
-    shockwaves.push({ x: cx, y: cy, r: 22, maxR: Math.max(width, height) * 0.62, life: 0, maxLife: 1.25, color: pal.coreRgb });
-    shockwaves.push({ x: cx, y: cy, r: 10, maxR: Math.max(width, height) * 0.42, life: 0, maxLife: 0.95, color: pal.coreInner });
+    shockwaves.push({ x: cx, y: cy, r: 22, maxR: Math.max(width, height) * 0.62, life: 0, maxLife: 1.25, color: '56, 204, 255' });
+    shockwaves.push({ x: cx, y: cy, r: 10, maxR: Math.max(width, height) * 0.42, life: 0, maxLife: 0.95, color: pal.coreRgb });
     spawnTapBurst(cx, cy, 46);
     spawnMeteor();
     setTimeout(spawnMeteor, 240);
@@ -946,7 +950,7 @@
       const now = performance.now();
       if (now - lastDragSparkle > 24 && bursts.length < 240) {
         lastDragSparkle = now;
-        const pal = getActivePalette(elapsed);
+        const pal = getHeartPalette(elapsed);
         bursts.push({
           kind: Math.random() < 0.45 ? 'star' : 'heart',
           x: e.clientX + rand(-6, 6),
@@ -1027,45 +1031,139 @@
   });
 
   // ============================================================
-  // 6. VẼ NỀN CỰC QUANG, ĐĨA BỆ HOLOGRAM & VÒNG THIÊN HÀ 3D
+  // 6. HIỆU ỨNG XANH DƯƠNG NEON 5D PHÍA SAU TRÁI TIM
+  //    (Đường hầm tam giác xanh 3D + Tia sáng hào quang xanh + Sóng cực quang xanh)
   // ============================================================
-  function drawAuroraBackdrop(t, beat, pal, energyBoost) {
+  function drawBlueBackdropBehindHeart(t, beat, energyBoost, shiftX, shiftY) {
+    // 1. Nền vũ trụ xanh thẫm sâu hút
     const bgGrad = ctx.createRadialGradient(
-      width * 0.5,
-      height * 0.48,
+      width * 0.5 + shiftX,
+      height * 0.46 + shiftY,
       10,
       width * 0.5,
       height * 0.5,
-      Math.max(width, height) * 0.9
+      Math.max(width, height) * 0.92
     );
-    bgGrad.addColorStop(0, pal.bgCenter);
-    bgGrad.addColorStop(0.42, pal.bgMid);
-    bgGrad.addColorStop(1, pal.bgEdge);
+    bgGrad.addColorStop(0, '#0c2758');
+    bgGrad.addColorStop(0.36, '#061433');
+    bgGrad.addColorStop(0.72, '#03081a');
+    bgGrad.addColorStop(1, '#01030a');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
 
-    const ax1 = width * (0.28 + 0.12 * Math.sin(t * 0.28));
-    const ay1 = height * (0.24 + 0.08 * Math.cos(t * 0.22));
-    const g1 = ctx.createRadialGradient(ax1, ay1, 10, ax1, ay1, Math.max(width, height) * 0.52);
-    g1.addColorStop(0, pal.aurora1);
+    const cx = width * 0.5 + shiftX * 0.7;
+    const cy = height * 0.46 + shiftY * 0.7;
+
+    // 2. Dải cực quang xanh lam - lục bảo uốn lượn phía sau trái tim
+    const ax1 = width * (0.28 + 0.14 * Math.sin(t * 0.32));
+    const ay1 = height * (0.25 + 0.09 * Math.cos(t * 0.24));
+    const g1 = ctx.createRadialGradient(ax1, ay1, 10, ax1, ay1, Math.max(width, height) * 0.54);
+    g1.addColorStop(0, 'rgba(0, 212, 255, 0.22)');
+    g1.addColorStop(0.5, 'rgba(37, 99, 235, 0.11)');
     g1.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = g1;
     ctx.fillRect(0, 0, width, height);
 
-    const ax2 = width * (0.74 + 0.1 * Math.cos(t * 0.25));
-    const ay2 = height * (0.76 + 0.08 * Math.sin(t * 0.2));
-    const g2 = ctx.createRadialGradient(ax2, ay2, 10, ax2, ay2, Math.max(width, height) * 0.48);
-    g2.addColorStop(0, pal.aurora2);
+    const ax2 = width * (0.72 + 0.12 * Math.cos(t * 0.27));
+    const ay2 = height * (0.72 + 0.1 * Math.sin(t * 0.22));
+    const g2 = ctx.createRadialGradient(ax2, ay2, 10, ax2, ay2, Math.max(width, height) * 0.52);
+    g2.addColorStop(0, 'rgba(56, 189, 248, 0.18)');
+    g2.addColorStop(0.5, 'rgba(79, 70, 229, 0.12)');
     g2.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = g2;
     ctx.fillRect(0, 0, width, height);
 
-    const nebR = unitScale * (2.6 + beat * 0.35 + energyBoost * 1.1);
-    const neb = ctx.createRadialGradient(width * 0.5, height * 0.48, 0, width * 0.5, height * 0.48, nebR);
-    neb.addColorStop(0, `rgba(${pal.coreRgb}, ${0.2 + beat * 0.1 + energyBoost * 0.18})`);
+    // 3. Các tia sáng cực quang xanh dương tỏa xoay tròn ngay đằng sau trái tim
+    const rayCount = 14;
+    const rayLen = Math.max(width, height) * (0.48 + beat * 0.05 + energyBoost * 0.12);
+    for (let i = 0; i < rayCount; i += 1) {
+      const ang = (Math.PI * 2 * i) / rayCount + t * 0.16;
+      const spread = 0.075 + 0.025 * Math.sin(t * 1.4 + i);
+      const alpha = (0.065 + 0.045 * Math.sin(t * 2.2 + i * 1.7)) * (1 + beat * 0.45 + energyBoost * 0.6);
+
+      const ex = cx + Math.cos(ang) * rayLen;
+      const ey = cy + Math.sin(ang) * rayLen;
+      const rGrad = ctx.createLinearGradient(cx, cy, ex, ey);
+      rGrad.addColorStop(0, `rgba(125, 228, 255, ${alpha})`);
+      rGrad.addColorStop(0.45, `rgba(37, 150, 255, ${alpha * 0.48})`);
+      rGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = rGrad;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(ang - spread) * rayLen, cy + Math.sin(ang - spread) * rayLen);
+      ctx.lineTo(cx + Math.cos(ang + spread) * rayLen, cy + Math.sin(ang + spread) * rayLen);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 4. Đường hầm tam giác ánh sáng Xanh Neon 5D phóng chiều sâu từ sau trái tim (y hệt nền video hi.mp4!)
+    const TRI_COUNT = 8;
+    const maxRadius = Math.hypot(width, height) * 0.72;
+    for (let i = 0; i < TRI_COUNT; i += 1) {
+      // Tiến độ từ xa (0) phóng mượt lại gần (1) lặp vô hạn
+      const prog = ((t * 0.24 + i / TRI_COUNT) % 1);
+      const eased = Math.pow(prog, 2.2);
+      const rad = 28 + eased * maxRadius;
+      const rot = t * 0.18 + i * 0.36 + prog * 0.65;
+      const alpha = Math.sin(prog * Math.PI) * (0.48 + beat * 0.18);
+      if (alpha <= 0.01) continue;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+
+      ctx.beginPath();
+      for (let v = 0; v < 3; v += 1) {
+        const va = -Math.PI / 2 + (v * Math.PI * 2) / 3;
+        const vx = Math.cos(va) * rad;
+        const vy = Math.sin(va) * rad;
+        if (v === 0) ctx.moveTo(vx, vy);
+        else ctx.lineTo(vx, vy);
+      }
+      ctx.closePath();
+
+      // Lớp hào quang xanh neon rộng bên ngoài
+      ctx.strokeStyle = `rgba(30, 144, 255, ${alpha * 0.42})`;
+      ctx.lineWidth = 6 + eased * 10;
+      ctx.stroke();
+
+      // Lớp lõi tia laser xanh băng sắc nét bên trong
+      ctx.strokeStyle = `rgba(148, 236, 255, ${alpha * 0.92})`;
+      ctx.lineWidth = 1.4 + eased * 2.2;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // 5. Dải sóng plasma xanh năng lượng uốn lượn ngang sau lưng trái tim
+    for (let w = 0; w < 2; w += 1) {
+      ctx.beginPath();
+      const stepX = Math.max(16, Math.floor(width / 46));
+      for (let x = 0; x <= width + stepX; x += stepX) {
+        const nx = x / width;
+        const amp = (28 + w * 18) * (0.85 + beat * 0.35);
+        const y =
+          cy +
+          (w === 0 ? -18 : 26) +
+          Math.sin(nx * 6.2 + t * (1.3 - w * 0.35) + w * 2) * amp +
+          Math.cos(nx * 11.5 - t * 1.8) * (amp * 0.35);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = w === 0 ? 'rgba(56, 214, 255, 0.24)' : 'rgba(99, 140, 255, 0.20)';
+      ctx.lineWidth = w === 0 ? 4 : 3;
+      ctx.stroke();
+    }
+
+    // 6. Quầng sáng xanh điện ngay sau tâm trái tim
+    const nebR = unitScale * (2.6 + beat * 0.38 + energyBoost * 1.15);
+    const neb = ctx.createRadialGradient(cx, cy, 0, cx, cy, nebR);
+    neb.addColorStop(0, `rgba(64, 210, 255, ${0.26 + beat * 0.12 + energyBoost * 0.2})`);
+    neb.addColorStop(0.45, 'rgba(37, 99, 235, 0.12)');
     neb.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = neb;
     ctx.fillRect(0, 0, width, height);
@@ -1194,7 +1292,8 @@
     lastTime = now;
     elapsed += dt;
     const t = elapsed;
-    const pal = getActivePalette(t);
+    const pal = getHeartPalette(t);
+    const bluePal = getBackBluePalette();
 
     manualSwirlBoost = Math.max(0, manualSwirlBoost - dt * 0.42);
 
@@ -1260,8 +1359,8 @@
     const cosX = Math.cos(viewX);
     const sinX = Math.sin(viewX);
 
-    // 1. Nền vũ trụ & cực quang
-    drawAuroraBackdrop(t, beat, pal, swirlAmt);
+    // 1. Nền hiệu ứng Xanh Neon 5D phía sau trái tim (tam giác neon phóng chiều sâu + tia sáng + sóng xanh)
+    drawBlueBackdropBehindHeart(t, beat, swirlAmt, -parallaxX * 140, -parallaxY * 140);
 
     // 2. Sao nền lấp lánh
     for (let i = 0; i < stars.length; i += 1) {
@@ -1311,10 +1410,10 @@
     }
     ctx.restore();
 
-    // 4. Vẽ Đĩa Bệ Hologram 3D phát sáng + Dải sáng vòng thiên hà
-    drawHologramPedestal(cosY, sinY, cosX, sinX, t, beat, pal, Math.max(0, pillarGlow));
+    // 4. Vẽ Đĩa Bệ Hologram Xanh 3D phát sáng + Dải sáng vòng thiên hà xanh
+    drawHologramPedestal(cosY, sinY, cosX, sinX, t, beat, bluePal, Math.max(0, pillarGlow));
     const ringIntro = Math.min(1, elapsed / 1.1);
-    drawGalaxyRibbonLines(cosY, sinY, cosX, sinX, pal, ringIntro);
+    drawGalaxyRibbonLines(cosY, sinY, cosX, sinX, bluePal, ringIntro);
 
     // 5. Xây hàng đợi Z-sort 3D thống nhất
     renderQueue.length = 0;
@@ -1350,7 +1449,7 @@
         type: 'pedestalDot',
         z: proj.z,
         proj,
-        sprite: pal.sprites[pp.spriteIdx],
+        sprite: bluePal.sprites[pp.spriteIdx],
         size: pp.size,
         alpha: pAlpha,
       });
@@ -1439,7 +1538,7 @@
       const sxT = Math.sin(ring.tiltX);
       const czT = Math.cos(ring.tiltZ);
       const szT = Math.sin(ring.tiltZ);
-      const ringSprite = pal.sprites[rIdx === 0 ? 0 : 2];
+      const ringSprite = bluePal.sprites[rIdx === 0 ? 0 : 2];
 
       for (let i = 0; i < ring.particles.length; i += 1) {
         const rp = ring.particles[i];
