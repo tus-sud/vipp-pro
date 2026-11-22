@@ -18,13 +18,14 @@
   const canvas = document.getElementById('scene5d');
   const ctx = canvas.getContext('2d');
   const musicToggle = document.getElementById('musicToggle');
+  const musicLabel = document.getElementById('musicLabel');
   const customAudio = document.getElementById('customAudio');
   const gestureHint = document.getElementById('gestureHint');
   const photoModal = document.getElementById('photoModal');
   const photoModalImg = document.getElementById('photoModalImg');
 
   // ============================================================
-  // 1. NHẠC NỀN LÃNG MẠN (FILE MP3 HOẶC HỘP NHẠC WEB AUDIO)
+  // 1. NHẠC NỀN LÃNG MẠN (FILE MP3 HOẶC PIANO/HỘP NHẠC WEB AUDIO)
   // ============================================================
   class RomanticMusicBox {
     constructor(audioEl, musicFile) {
@@ -39,36 +40,41 @@
       this.stepTimer = null;
       this.stepIndex = 0;
 
+      // Giai điệu piano + hộp nhạc lãng mạn ấm áp, rõ tiếng
       this.sequence = [
-        { lead: 659.25, chord: [261.63, 329.63, 392.0] },
+        // Cmaj7
+        { bass: 130.81, lead: 659.25, chord: [261.63, 329.63, 392.0] },
         { lead: 783.99, chord: [493.88] },
         { lead: 1046.5, chord: [392.0] },
-        { lead: 987.77, chord: [329.63] },
+        { bass: 130.81, lead: 987.77, chord: [329.63, 493.88] },
         { lead: 783.99, chord: [261.63, 392.0] },
         { lead: 659.25, chord: [493.88] },
-        { lead: 880.0, chord: [220.0, 261.63, 329.63] },
+        // Am7
+        { bass: 110.0, lead: 880.0, chord: [220.0, 261.63, 329.63] },
         { lead: 783.99, chord: [392.0] },
         { lead: 659.25, chord: [329.63] },
-        { lead: 587.33, chord: [261.63] },
+        { bass: 110.0, lead: 587.33, chord: [261.63, 392.0] },
         { lead: 523.25, chord: [220.0, 329.63] },
-        { lead: null, chord: [392.0] },
-        { lead: 698.46, chord: [174.61, 261.63, 329.63] },
+        { lead: 659.25, chord: [392.0] },
+        // Fmaj7
+        { bass: 87.31, lead: 698.46, chord: [174.61, 261.63, 329.63] },
         { lead: 880.0, chord: [349.23] },
         { lead: 783.99, chord: [329.63] },
-        { lead: 659.25, chord: [261.63] },
+        { bass: 87.31, lead: 659.25, chord: [261.63, 349.23] },
         { lead: 587.33, chord: [174.61, 329.63] },
         { lead: 523.25, chord: [349.23] },
-        { lead: 587.33, chord: [196.0, 246.94, 293.66] },
+        // G6 -> G7
+        { bass: 98.0, lead: 587.33, chord: [196.0, 246.94, 293.66] },
         { lead: 659.25, chord: [392.0] },
         { lead: 783.99, chord: [293.66] },
-        { lead: 659.25, chord: [246.94] },
+        { bass: 98.0, lead: 659.25, chord: [246.94, 392.0] },
         { lead: 587.33, chord: [196.0, 392.0] },
-        { lead: null, chord: [293.66] },
+        { lead: 523.25, chord: [293.66] },
       ];
 
       if (this.useCustomFile) {
         this.audioEl.src = this.musicFile;
-        this.audioEl.volume = 0.68;
+        this.audioEl.volume = 0.85;
         this.audioEl.addEventListener('error', () => {
           this.useCustomFile = false;
           if (this.isPlaying) this.startSynth();
@@ -81,42 +87,51 @@
       const AudioCtor = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtor) return;
       this.ctx = new AudioCtor();
+
+      // Bộ nén động lực nhẹ giúp âm thanh đầy đặn, rõ tiếng, không bao giờ rè
+      const compressor = this.ctx.createDynamicsCompressor();
+      compressor.threshold.value = -14;
+      compressor.knee.value = 18;
+      compressor.ratio.value = 4;
+
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.24;
+      this.masterGain.gain.value = 0.78;
 
       this.delayNode = this.ctx.createDelay(1.0);
       this.delayNode.delayTime.value = 0.34;
       const feedback = this.ctx.createGain();
-      feedback.gain.value = 0.24;
+      feedback.gain.value = 0.28;
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.value = 2100;
+      filter.frequency.value = 2600;
 
       this.delayNode.connect(filter);
       filter.connect(feedback);
       feedback.connect(this.delayNode);
       filter.connect(this.masterGain);
-      this.masterGain.connect(this.ctx.destination);
+
+      this.masterGain.connect(compressor);
+      compressor.connect(this.ctx.destination);
     }
 
-    playBell(freq, vol, dur, offset = 0) {
+    playTone(freq, vol, dur, offset = 0, warm = false) {
       if (!this.ctx || !this.masterGain) return;
       const now = this.ctx.currentTime + offset;
       const gain = this.ctx.createGain();
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(vol, now + 0.018);
+      gain.gain.exponentialRampToValueAtTime(vol, now + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
       const osc1 = this.ctx.createOscillator();
-      osc1.type = 'sine';
+      osc1.type = warm ? 'triangle' : 'sine';
       osc1.frequency.setValueAtTime(freq, now);
 
       const osc2 = this.ctx.createOscillator();
-      osc2.type = 'triangle';
+      osc2.type = 'sine';
       osc2.frequency.setValueAtTime(freq * 2, now);
       const hGain = this.ctx.createGain();
-      hGain.gain.setValueAtTime(0.14, now);
-      hGain.gain.exponentialRampToValueAtTime(0.001, now + Math.min(0.45, dur * 0.45));
+      hGain.gain.setValueAtTime(warm ? 0.12 : 0.22, now);
+      hGain.gain.exponentialRampToValueAtTime(0.001, now + Math.min(0.55, dur * 0.5));
 
       osc1.connect(gain);
       osc2.connect(hGain);
@@ -126,29 +141,40 @@
 
       osc1.start(now);
       osc2.start(now);
-      osc1.stop(now + dur + 0.05);
-      osc2.stop(now + dur + 0.05);
+      osc1.stop(now + dur + 0.06);
+      osc2.stop(now + dur + 0.06);
     }
 
-    startSynth() {
+    async startSynth() {
       this.initAudioCtx();
-      if (!this.ctx) return;
-      if (this.ctx.state === 'suspended') this.ctx.resume();
+      if (!this.ctx) return false;
+      if (this.ctx.state === 'suspended') {
+        try {
+          await this.ctx.resume();
+        } catch {
+          return false;
+        }
+      }
+      if (this.ctx.state !== 'running') return false;
       if (this.stepTimer) clearInterval(this.stepTimer);
 
       const tick = () => {
-        if (!this.isPlaying) return;
+        if (!this.isPlaying || !this.ctx || this.ctx.state !== 'running') return;
         const step = this.sequence[this.stepIndex % this.sequence.length];
         this.stepIndex += 1;
+        if (step.bass) {
+          this.playTone(step.bass, 0.34, 2.1, 0, true);
+        }
         if (step.chord) {
-          step.chord.forEach((f, i) => this.playBell(f, 0.14, 1.5, i * 0.035));
+          step.chord.forEach((f, i) => this.playTone(f, 0.24, 1.65, i * 0.032, true));
         }
         if (step.lead) {
-          this.playBell(step.lead, 0.28, 1.9, 0.01);
+          this.playTone(step.lead, 0.5, 2.0, 0.01, false);
         }
       };
       tick();
-      this.stepTimer = setInterval(tick, 460);
+      this.stepTimer = setInterval(tick, 440);
+      return true;
     }
 
     stopSynth() {
@@ -160,17 +186,29 @@
 
     async play() {
       if (this.isPlaying) return;
-      this.isPlaying = true;
-      this.updateUI();
       if (this.useCustomFile) {
         try {
           await this.audioEl.play();
+          this.isPlaying = true;
+          this.updateUI();
           return;
         } catch {
-          this.useCustomFile = false;
+          // Nếu trình duyệt chặn autoplay -> giữ nguyên để lần chạm đầu phát lại
+          if (this.audioEl.error) {
+            this.useCustomFile = false;
+          } else {
+            this.isPlaying = false;
+            this.updateUI();
+            return;
+          }
         }
       }
-      this.startSynth();
+      this.isPlaying = true;
+      const ok = await this.startSynth();
+      if (!ok) {
+        this.isPlaying = false;
+      }
+      this.updateUI();
     }
 
     pause() {
@@ -191,12 +229,17 @@
     }
 
     tryAutoStart() {
-      if (!this.isPlaying && !this.userMuted) this.play();
+      if (!this.isPlaying && !this.userMuted) {
+        this.play();
+      }
     }
 
     updateUI() {
       musicToggle.classList.toggle('is-playing', this.isPlaying);
       musicToggle.setAttribute('aria-pressed', String(this.isPlaying));
+      if (musicLabel) {
+        musicLabel.textContent = this.isPlaying ? 'Đang phát' : 'Bật nhạc';
+      }
     }
   }
 
@@ -204,6 +247,19 @@
   musicToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     music.toggle();
+  });
+
+  // Thử tự phát ngay khi mở trang, đồng thời mở khóa âm thanh chắc chắn ngay lần chạm/click đầu tiên
+  music.tryAutoStart();
+  ['click', 'touchstart', 'keydown'].forEach((evt) => {
+    window.addEventListener(
+      evt,
+      (e) => {
+        if (e.target && e.target.closest && e.target.closest('#musicToggle')) return;
+        music.tryAutoStart();
+      },
+      { passive: true }
+    );
   });
 
   // ============================================================

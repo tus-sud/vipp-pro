@@ -41,17 +41,33 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 12px 7px 8px;
+  padding: 7px 14px 7px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 168, 212, 0.38);
-  background: rgba(34, 10, 40, 0.56);
+  border: 1px solid rgba(255, 168, 212, 0.5);
+  background: rgba(42, 12, 48, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: #ffd6ea;
+  color: #ffe2f1;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
   touch-action: manipulation;
-  box-shadow: 0 8px 24px rgba(255, 64, 146, 0.25);
+  box-shadow: 0 8px 24px rgba(255, 64, 146, 0.32);
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hud-pill:not(.is-playing) {
+  animation: pulseMusicBtn 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseMusicBtn {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 168, 0.55), 0 8px 22px rgba(255, 64, 146, 0.3); }
+  50% { box-shadow: 0 0 0 9px rgba(255, 92, 168, 0), 0 8px 26px rgba(255, 64, 146, 0.5); }
+}
+
+.hud-label {
+  white-space: nowrap;
 }
 
 .hud-pill:hover {

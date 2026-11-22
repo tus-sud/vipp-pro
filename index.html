@@ -11,7 +11,7 @@
   <!-- Sân khấu 5D toàn màn hình (không lời chúc, thuần hiệu ứng hình ảnh & trái tim) -->
   <canvas id="scene5d" aria-label="Hiệu ứng trái tim 5D và hình ảnh xoay rơi"></canvas>
 
-  <!-- Nút nhạc nền nhỏ gọn góc trên phải -->
+  <!-- Nút nhạc nền góc trên phải (bấm để bật/tắt nhạc) -->
   <button
     id="musicToggle"
     class="hud-pill"
@@ -19,7 +19,8 @@
     aria-pressed="false"
     aria-label="Bật hoặc tắt nhạc nền"
   >
-    <span class="hud-disc" aria-hidden="true">♥</span>
+    <span class="hud-disc" aria-hidden="true">♪</span>
+    <span id="musicLabel" class="hud-label">Bật nhạc</span>
     <span class="hud-eq" aria-hidden="true">
       <span></span>
       <span></span>
